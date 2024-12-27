@@ -51,7 +51,7 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUser{TKey}"/> properties and a table name "Users".
     /// </remarks>
-    protected virtual UserTableNames<TKey> UserNames { get; }
+    protected virtual UserTableNames UserNames { get; }
 
     /// <summary>
     /// Gets the SQL table and column names used for the <typeparamref name="TUserLogin"/> table.
@@ -59,7 +59,7 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUserLogin{TKey}"/> properties and a table name "UserLogins".
     /// </remarks>
-    protected virtual UserLoginTableNames<TKey> UserLoginNames { get; }
+    protected virtual UserLoginTableNames UserLoginNames { get; }
 
     /// <summary>
     /// Gets the SQL table and column names used for the <typeparamref name="TUserClaim"/> table.
@@ -67,7 +67,7 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUserClaim{TKey}"/> properties and a table name "UserClaims".
     /// </remarks>
-    protected virtual UserClaimTableNames<TKey> UserClaimNames { get; }
+    protected virtual UserClaimTableNames UserClaimNames { get; }
 
     /// <summary>
     /// Gets the SQL table and column names used for the <typeparamref name="TUserToken"/> table.
@@ -75,7 +75,7 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUserToken{TKey}"/> properties and a table name "UserTokens".
     /// </remarks>
-    protected virtual UserTokenTableNames<TKey> UserTokenNames { get; }
+    protected virtual UserTokenTableNames UserTokenNames { get; }
 
     /// <summary>
     /// Gets the SQL table and column names used for the <typeparamref name="TRole"/> table.
@@ -83,7 +83,7 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityRole{TKey}"/> properties and a table name "Roles".
     /// </remarks>
-    protected virtual RoleTableNames<TKey> RoleNames { get; }
+    protected virtual RoleTableNames RoleNames { get; }
 
     /// <summary>
     /// Gets the SQL table and column names used for the <typeparamref name="TUserRole"/> table.
@@ -91,7 +91,7 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUserRole{TKey}"/> properties and a table name "UserRoles".
     /// </remarks>
-    protected virtual UserRoleTableNames<TKey> UserRoleNames { get; }
+    protected virtual UserRoleTableNames UserRoleNames { get; }
 
 
     /// <summary>

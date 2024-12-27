@@ -11,12 +11,19 @@ The `DapperUserStore` class provides an implementation for a Dapper-based Identi
 
 #### Using Identity User
 
-```csharp
+```c#
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Services.AddIdentityCore<IdentityUser>()
+    .AddRoles<IdentityRole>()
+    .AddDapperStores();
+
+// OR
+
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddUserStore<DapperUserStore>()
-    .AddRoleStore<DapperRoleStore>();
+    .AddDapperStores();
+
 
 var app = builder.Build();
 ...
@@ -24,21 +31,23 @@ var app = builder.Build();
 
 #### Using Custom User
 
-```csharp
+```c#
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddIdentity<CustomUser, IdentityRole<Guid>>()
-    .AddRoleStore<DapperRoleStore<IdentityRole<Guid>, Guid>>();
-
-builder.Services.AddScoped<DapperUserStore<CustomUser, IdentityRole<Guid>, Guid>>(sp =>
-    new(sp.GetRequiredService<DbDataSource>(), sp.GetService<IdentityErrorDescriber>(), JsonNamingPolicy.SnakeCaseLower)
+builder.Services.AddIdentityCore<CustomUser>()
+    .AddRoles<IdentityRole<Guid>>()
+    .AddDapperStores(options =>
     {
-        ExtraUserInsertProperties = [nameof(CustomUser.CreatedOn), nameof(CustomUser.FirstName), nameof(CustomUser.LastName)],
-        ExtraUserUpdateProperties = [nameof(CustomUser.FirstName), nameof(CustomUser.LastName)]
-    });
+        options.TableSchema = "identity";
+        options.TableNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+        options.UserNames.Table = "app_users";
 
-builder.Services.AddScoped<IUserStore<CustomUser>>(sp =>
-    sp.GetRequiredService<DapperUserStore<CustomUser, IdentityRole<Guid>, Guid>>());
+        options.ExtraUserInsertProperties = [
+            nameof(CustomUser.CreatedOn), nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
+
+        options.ExtraUserUpdateProperties = [
+            nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
+    });
 
 var app = builder.Build();
 
@@ -56,14 +65,12 @@ public class CustomUser : IdentityUser<Guid>
 
 The `DapperUserStoreBase` class provides a base implementation for a Dapper-based Identity user store. Below is an example of how to use it.
 
-```csharp
+```c#
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentity<CustomUser, IdentityRole<Guid>>()
+    .AddUserStore<CustomUserStore>();
     .AddRoleStore<DapperRoleStore<IdentityRole<Guid>, Guid>>();
-
-builder.Services.AddScoped<CustomUserStore>();
-builder.Services.AddScoped<IUserStore<CustomUser>>(sp => sp.GetRequiredService<CustomUserStore>());
 
 var app = builder.Build();
 

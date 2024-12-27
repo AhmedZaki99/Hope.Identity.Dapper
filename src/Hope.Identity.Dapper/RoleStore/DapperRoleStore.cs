@@ -1,16 +1,13 @@
 ﻿using System.Data.Common;
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Hope.Identity.Dapper;
 
 /// <summary>
 /// Provides an implementation for a Dapper-based Identity role store.
 /// </summary>
-/// <remarks>
-/// This class exposes <see cref="ExtraRoleInsertProperties"/> and <see cref="ExtraRoleUpdateProperties"/> properties
-/// to implement functionality required in <see cref="DapperRoleStoreBase{TRole, TKey, TUserRole, TRoleClaim}"/>
-/// </remarks>
 /// <inheritdoc/>
 public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
     : DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
@@ -20,18 +17,19 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
     where TRoleClaim : IdentityRoleClaim<TKey>, new()
 {
     /// <summary>
-    /// Gets an array of the extra property names within <typeparamref name="TRole"/> used for insert queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
+    /// Gets the options used to configure the store.
     /// </summary>
-    protected virtual string[] ExtraRoleInsertProperties { get; set; }
-
-    /// <summary>
-    /// Gets an array of the extra property names within <typeparamref name="TRole"/> used for update queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
-    /// </summary>
-    protected virtual string[] ExtraRoleUpdateProperties { get; set; }
+    protected virtual DapperStoreOptions Options { get; }
 
 
     /// <inheritdoc/>
-    protected override JsonNamingPolicy? TableNamingPolicy { get; }
+    protected override JsonNamingPolicy? TableNamingPolicy => Options.TableNamingPolicy;
+
+    /// <inheritdoc/>
+    protected override RoleTableNames RoleNames => Options.RoleNames;
+
+    /// <inheritdoc/>
+    protected override RoleClaimTableNames RoleClaimNames => Options.RoleClaimNames;
 
 
     /// <summary>
@@ -39,27 +37,19 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
     /// </summary>
     /// <param name="dbDataSource">The <see cref="DbDataSource"/> used to create database connections.</param>
     /// <param name="describer">The <see cref="IdentityErrorDescriber"/> used to describe store errors.</param>
-    /// <param name="tableNamingPolicy">
-    /// The naming policy used to convert property names to SQL table names and/or column names (<see langword="null"/> for no conversion).
-    /// <br/><br/>
-    /// For example, a naming policy like <see cref="JsonNamingPolicy.SnakeCaseLower"/> will build a query like this:
-    /// <code>
-    /// INSERT INTO roles (id, name, normalized_name, ...) 
-    /// VALUES (@Id, @Name, @NormalizedName, ...)
-    /// </code>
-    /// </param>
-    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy? tableNamingPolicy = null) 
+    /// <param name="options">The options used to configure the store.</param>
+    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
         : base(dbDataSource, describer) 
     {
-        TableNamingPolicy = tableNamingPolicy;
-
-        ExtraRoleInsertProperties = [];
-        ExtraRoleUpdateProperties = [];
+        Options = options.Value;
     }
 
-    /// <inheritdoc/>
-    protected override string[] GetRoleInsertProperties(string[] identityUserInsertProperties) => [.. identityUserInsertProperties, .. ExtraRoleInsertProperties];
 
     /// <inheritdoc/>
-    protected override string[] GetRoleUpdateProperties(string[] identityUserUpdateProperties) => [.. identityUserUpdateProperties, .. ExtraRoleUpdateProperties];
+    protected override string[] GetRoleInsertProperties(string[] identityUserInsertProperties) => 
+        [.. identityUserInsertProperties, .. Options.ExtraRoleInsertProperties];
+
+    /// <inheritdoc/>
+    protected override string[] GetRoleUpdateProperties(string[] identityUserUpdateProperties) => 
+        [.. identityUserUpdateProperties, .. Options.ExtraRoleUpdateProperties];
 }

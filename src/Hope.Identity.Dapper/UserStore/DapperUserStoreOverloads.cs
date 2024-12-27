@@ -1,6 +1,6 @@
 ﻿using System.Data.Common;
-using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Hope.Identity.Dapper;
 
@@ -10,26 +10,16 @@ namespace Hope.Identity.Dapper;
 public class DapperUserStore
     : DapperUserStore<IdentityUser<string>>
 {
-    /// <remarks>
-    /// Typically returns an empty array.
-    /// </remarks>
     /// <inheritdoc/>
-    protected sealed override string[] ExtraUserInsertProperties { get; set; }
-
-    /// <remarks>
-    /// Typically returns an empty array.
-    /// </remarks>
-    /// <inheritdoc/>
-    protected sealed override string[] ExtraUserUpdateProperties { get; set; }
+    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
+        : base(dbDataSource, describer, options) { }
 
 
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
-        : base(dbDataSource, describer, tableNamingPolicy) 
-    {
-        ExtraUserInsertProperties = [];
-        ExtraUserUpdateProperties = [];
-    }
+    protected override string[] GetUserInsertProperties(string[] identityUserInsertProperties) => identityUserInsertProperties;
+
+    /// <inheritdoc/>
+    protected override string[] GetUserUpdateProperties(string[] identityUserUpdateProperties) => identityUserUpdateProperties;
 }
 
 /// <inheritdoc/>
@@ -38,8 +28,8 @@ public class DapperUserStore<TUser>
     where TUser : IdentityUser<string>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
-        : base(dbDataSource, describer, tableNamingPolicy) { }
+    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
+        : base(dbDataSource, describer, options) { }
 }
 
 /// <summary>
@@ -52,8 +42,8 @@ public class DapperUserStore<TUser, TRole>
     where TRole : IdentityRole<string>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
-        : base(dbDataSource, describer, tableNamingPolicy) { }
+    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
+        : base(dbDataSource, describer, options) { }
 }
 
 /// <summary>
@@ -67,6 +57,6 @@ public class DapperUserStore<TUser, TRole, TKey>
     where TKey : IEquatable<TKey>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
-        : base(dbDataSource, describer, tableNamingPolicy) { }
+    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
+        : base(dbDataSource, describer, options) { }
 }

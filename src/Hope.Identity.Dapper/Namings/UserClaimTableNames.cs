@@ -6,17 +6,10 @@ namespace Hope.Identity.Dapper;
 /// <summary>
 /// Represents the table and column names for the user claim table.
 /// </summary>
-/// <param name="namingPolicy">
-/// The naming policy to use for converting the <see cref="IdentityUserClaim{TKey}"/> property names to default column names (<see langword="null"/> for no conversion).
-/// </param>
-/// <param name="table">The name of the table.</param>
-/// <typeparam name="TKey">The type of the primary key for the user claim.</typeparam>
 /// <remarks>
-/// The default pre-conversion table name is "UserClaims", which the provided <paramref name="namingPolicy"/> use to set the default table name.
+/// The default pre-conversion table name is "UserClaims", which is then converted using the provided <see cref="JsonNamingPolicy"/>.
 /// </remarks>
-public class UserClaimTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, string? table = null)
-    : TableNames(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
-    where TKey : IEquatable<TKey>
+public class UserClaimTableNames : TableNames
 {
     /// <summary>
     /// The default table name in PascalCase (pre-conversion).
@@ -27,15 +20,24 @@ public class UserClaimTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, st
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUserClaim{TKey}.UserId"/> property.
     /// </summary>
-    public string UserId { get; init; } = nameof(IdentityUserClaim<TKey>.UserId).ToSqlColumn(namingPolicy);
+    public string UserId { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUserClaim{TKey}.ClaimType"/> property.
     /// </summary>
-    public string ClaimType { get; init; } = nameof(IdentityUserClaim<TKey>.ClaimType).ToSqlColumn(namingPolicy);
+    public string ClaimType { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUserClaim{TKey}.ClaimValue"/> property.
     /// </summary>
-    public string ClaimValue { get; init; } = nameof(IdentityUserClaim<TKey>.ClaimValue).ToSqlColumn(namingPolicy);
+    public string ClaimValue { get; set; }
+
+
+    internal UserClaimTableNames(JsonNamingPolicy? namingPolicy = null, string? table = null) 
+        : base(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
+    {
+        UserId = nameof(IdentityUserClaim<string>.UserId).ToSqlColumn(namingPolicy);
+        ClaimType = nameof(IdentityUserClaim<string>.ClaimType).ToSqlColumn(namingPolicy);
+        ClaimValue = nameof(IdentityUserClaim<string>.ClaimValue).ToSqlColumn(namingPolicy);
+    }
 }

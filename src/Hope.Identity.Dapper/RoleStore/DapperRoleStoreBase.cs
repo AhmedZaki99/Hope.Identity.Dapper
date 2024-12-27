@@ -46,7 +46,7 @@ public abstract class DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityRole{TKey}"/> properties and a table name "Roles".
     /// </remarks>
-    protected virtual RoleTableNames<TKey> RoleNames { get; }
+    protected virtual RoleTableNames RoleNames { get; }
 
     /// <summary>
     /// Gets the SQL table and column names used for the <typeparamref name="TRoleClaim"/> table.
@@ -54,7 +54,7 @@ public abstract class DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityRoleClaim{TKey}"/> properties and a table name "RoleClaims".
     /// </remarks>
-    protected virtual RoleClaimTableNames<TKey> RoleClaimNames { get; }
+    protected virtual RoleClaimTableNames RoleClaimNames { get; }
 
 
     /// <summary>

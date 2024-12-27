@@ -6,17 +6,10 @@ namespace Hope.Identity.Dapper;
 /// <summary>
 /// Represents the table and column names for the user token table.
 /// </summary>
-/// <param name="namingPolicy">
-/// The naming policy to use for converting the <see cref="IdentityUserToken{TKey}"/> property names to default column names (<see langword="null"/> for no conversion).
-/// </param>
-/// <param name="table">The name of the table.</param>
-/// <typeparam name="TKey">The type of the primary key for the user token.</typeparam>
 /// <remarks>
-/// The default pre-conversion table name is "UserTokens", which the provided <paramref name="namingPolicy"/> use to set the default table name.
+/// The default pre-conversion table name is "UserTokens", which is then converted using the provided <see cref="JsonNamingPolicy"/>.
 /// </remarks>
-public class UserTokenTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, string? table = null)
-    : TableNames(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
-    where TKey : IEquatable<TKey>
+public class UserTokenTableNames : TableNames
 {
     /// <summary>
     /// The default table name in PascalCase (pre-conversion).
@@ -27,20 +20,30 @@ public class UserTokenTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, st
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUserToken{TKey}.UserId"/> property.
     /// </summary>
-    public string UserId { get; init; } = nameof(IdentityUserToken<TKey>.UserId).ToSqlColumn(namingPolicy);
+    public string UserId { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUserToken{TKey}.LoginProvider"/> property.
     /// </summary>
-    public string LoginProvider { get; init; } = nameof(IdentityUserToken<TKey>.LoginProvider).ToSqlColumn(namingPolicy);
+    public string LoginProvider { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUserToken{TKey}.Name"/> property.
     /// </summary>
-    public string Name { get; init; } = nameof(IdentityUserToken<TKey>.Name).ToSqlColumn(namingPolicy);
+    public string Name { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUserToken{TKey}.Value"/> property.
     /// </summary>
-    public string Value { get; init; } = nameof(IdentityUserToken<TKey>.Value).ToSqlColumn(namingPolicy);
+    public string Value { get; set; }
+
+
+    internal UserTokenTableNames(JsonNamingPolicy? namingPolicy = null, string? table = null) 
+        : base(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
+    {
+        UserId = nameof(IdentityUserToken<string>.UserId).ToSqlColumn(namingPolicy);
+        LoginProvider = nameof(IdentityUserToken<string>.LoginProvider).ToSqlColumn(namingPolicy);
+        Name = nameof(IdentityUserToken<string>.Name).ToSqlColumn(namingPolicy);
+        Value = nameof(IdentityUserToken<string>.Value).ToSqlColumn(namingPolicy);
+    }
 }

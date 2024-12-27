@@ -6,17 +6,10 @@ namespace Hope.Identity.Dapper;
 /// <summary>
 /// Represents the table and column names for the user role table.
 /// </summary>
-/// <param name="namingPolicy">
-/// The naming policy to use for converting the <see cref="IdentityUserRole{TKey}"/> property names to default column names (<see langword="null"/> for no conversion).
-/// </param>
-/// <param name="table">The name of the table.</param>
-/// <typeparam name="TKey">The type of the primary key for the user role.</typeparam>
 /// <remarks>
-/// The default pre-conversion table name is "UserRoles", which the provided <paramref name="namingPolicy"/> use to set the default table name.
+/// The default pre-conversion table name is "UserRoles", which is then converted using the provided <see cref="JsonNamingPolicy"/>.
 /// </remarks>
-public class UserRoleTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, string? table = null)
-    : TableNames(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
-    where TKey : IEquatable<TKey>
+public class UserRoleTableNames : TableNames
 {
     /// <summary>
     /// The default table name in PascalCase (pre-conversion).
@@ -27,10 +20,18 @@ public class UserRoleTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, str
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUserRole{TKey}.UserId"/> property.
     /// </summary>
-    public string UserId { get; init; } = nameof(IdentityUserRole<TKey>.UserId).ToSqlColumn(namingPolicy);
+    public string UserId { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUserRole{TKey}.RoleId"/> property.
     /// </summary>
-    public string RoleId { get; init; } = nameof(IdentityUserRole<TKey>.RoleId).ToSqlColumn(namingPolicy);
+    public string RoleId { get; set; }
+
+
+    internal UserRoleTableNames(JsonNamingPolicy? namingPolicy = null, string? table = null) 
+        : base(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
+    {
+        UserId = nameof(IdentityUserRole<string>.UserId).ToSqlColumn(namingPolicy);
+        RoleId = nameof(IdentityUserRole<string>.RoleId).ToSqlColumn(namingPolicy);
+    }
 }

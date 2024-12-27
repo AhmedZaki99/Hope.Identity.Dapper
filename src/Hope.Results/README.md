@@ -7,7 +7,7 @@
 
 Error models:
 
-```csharp
+```c#
 public Result DoSomething()
 {
     // Do something
@@ -46,7 +46,7 @@ public void CallDoSomething()
 
 Pagination:
 
-```csharp
+```c#
 public async Task<PagedList<Book>> ListAsync(PaginationParams? paginationParams = null, CancellationToken cancellationToken = default)
 {
     var tenantId = _multiTenancyContext.CurrentTenantId;

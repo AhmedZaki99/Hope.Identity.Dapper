@@ -5,7 +5,7 @@
 
 ## Usage
 
-```csharp
+```c#
 
 var builder = WebApplication.CreateBuilder(args);
 

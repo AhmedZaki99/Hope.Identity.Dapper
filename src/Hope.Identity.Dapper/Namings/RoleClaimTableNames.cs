@@ -6,17 +6,10 @@ namespace Hope.Identity.Dapper;
 /// <summary>
 /// Represents the table and column names for the role claim table.
 /// </summary>
-/// <param name="namingPolicy">
-/// The naming policy to use for converting the <see cref="IdentityRoleClaim{TKey}"/> property names to default column names (<see langword="null"/> for no conversion).
-/// </param>
-/// <param name="table">The name of the table.</param>
-/// <typeparam name="TKey">The type of the primary key for the role claim.</typeparam>
 /// <remarks>
-/// The default pre-conversion table name is "RoleClaims", which the provided <paramref name="namingPolicy"/> use to set the default table name.
+/// The default pre-conversion table name is "RoleClaims", which is then converted using the provided <see cref="JsonNamingPolicy"/>.
 /// </remarks>
-public class RoleClaimTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, string? table = null)
-    : TableNames(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
-    where TKey : IEquatable<TKey>
+public class RoleClaimTableNames : TableNames
 {
     /// <summary>
     /// The default table name in PascalCase (pre-conversion).
@@ -27,15 +20,24 @@ public class RoleClaimTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, st
     /// <summary>
     /// Gets the column name for the <see cref="IdentityRoleClaim{TKey}.RoleId"/> property.
     /// </summary>
-    public string RoleId { get; init; } = nameof(IdentityRoleClaim<TKey>.RoleId).ToSqlColumn(namingPolicy);
+    public string RoleId { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityRoleClaim{TKey}.ClaimType"/> property.
     /// </summary>
-    public string ClaimType { get; init; } = nameof(IdentityRoleClaim<TKey>.ClaimType).ToSqlColumn(namingPolicy);
+    public string ClaimType { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityRoleClaim{TKey}.ClaimValue"/> property.
     /// </summary>
-    public string ClaimValue { get; init; } = nameof(IdentityRoleClaim<TKey>.ClaimValue).ToSqlColumn(namingPolicy);
+    public string ClaimValue { get; set; }
+
+
+    internal RoleClaimTableNames(JsonNamingPolicy? namingPolicy = null, string? table = null) 
+        : base(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
+    {
+        RoleId = nameof(IdentityRoleClaim<string>.RoleId).ToSqlColumn(namingPolicy);
+        ClaimType = nameof(IdentityRoleClaim<string>.ClaimType).ToSqlColumn(namingPolicy);
+        ClaimValue = nameof(IdentityRoleClaim<string>.ClaimValue).ToSqlColumn(namingPolicy);
+    }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Data.Common;
-using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Hope.Identity.Dapper;
 
@@ -10,26 +10,16 @@ namespace Hope.Identity.Dapper;
 public abstract class DapperRoleStore
     : DapperRoleStore<IdentityRole<string>>
 {
-    /// <remarks>
-    /// Typically returns an empty array.
-    /// </remarks>
     /// <inheritdoc/>
-    protected sealed override string[] ExtraRoleInsertProperties { get; set; }
-
-    /// <remarks>
-    /// Typically returns an empty array.
-    /// </remarks>
-    /// <inheritdoc/>
-    protected sealed override string[] ExtraRoleUpdateProperties { get; set; }
+    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
+        : base(dbDataSource, describer, options) { }
 
 
     /// <inheritdoc/>
-    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
-        : base(dbDataSource, describer, tableNamingPolicy) 
-    {
-        ExtraRoleInsertProperties = [];
-        ExtraRoleUpdateProperties = [];
-    }
+    protected override string[] GetRoleInsertProperties(string[] identityUserInsertProperties) => identityUserInsertProperties;
+
+    /// <inheritdoc/>
+    protected override string[] GetRoleUpdateProperties(string[] identityUserUpdateProperties) => identityUserUpdateProperties;
 }
 
 /// <summary>
@@ -41,8 +31,8 @@ public class DapperRoleStore<TRole>
     where TRole : IdentityRole<string>
 {
     /// <inheritdoc/>
-    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
-        : base(dbDataSource, describer, tableNamingPolicy) { }
+    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
+        : base(dbDataSource, describer, options) { }
 }
 
 /// <summary>
@@ -55,6 +45,6 @@ public class DapperRoleStore<TRole, TKey>
     where TKey : IEquatable<TKey>
 {
     /// <inheritdoc/>
-    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
-        : base(dbDataSource, describer, tableNamingPolicy) { }
+    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
+        : base(dbDataSource, describer, options) { }
 }

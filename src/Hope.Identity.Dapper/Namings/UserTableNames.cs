@@ -6,15 +6,10 @@ namespace Hope.Identity.Dapper;
 /// <summary>
 /// Represents the table and column names for the user table.
 /// </summary>
-/// <param name="namingPolicy">The naming policy to use for converting the <see cref="IdentityUser{TKey}"/> property names to default column names.</param>
-/// <param name="table">The name of the table.</param>
-/// <typeparam name="TKey">The type of the primary key for the user.</typeparam>
 /// <remarks>
-/// The default pre-conversion table name is "Users", which the provided <paramref name="namingPolicy"/> use to set the default table name.
+/// The default pre-conversion table name is "Users", which is then converted using the provided <see cref="JsonNamingPolicy"/>.
 /// </remarks>
-public class UserTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, string? table = null)
-    : TableNames(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
-    where TKey : IEquatable<TKey>
+public class UserTableNames : TableNames
 {
     /// <summary>
     /// The default table name in PascalCase (pre-conversion).
@@ -25,15 +20,24 @@ public class UserTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, string?
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUser{TKey}.Id"/> property.
     /// </summary>
-    public string Id { get; init; } = nameof(IdentityUser<TKey>.Id).ToSqlColumn(namingPolicy);
+    public string Id { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUser{TKey}.NormalizedEmail"/> property.
     /// </summary>
-    public string NormalizedEmail { get; init; } = nameof(IdentityUser<TKey>.NormalizedEmail).ToSqlColumn(namingPolicy);
+    public string NormalizedEmail { get; set; }
 
     /// <summary>
     /// Gets the column name for the <see cref="IdentityUser{TKey}.NormalizedUserName"/> property.
     /// </summary>
-    public string NormalizedUserName { get; init; } = nameof(IdentityUser<TKey>.NormalizedUserName).ToSqlColumn(namingPolicy);
+    public string NormalizedUserName { get; set; }
+
+
+    internal UserTableNames(JsonNamingPolicy? namingPolicy = null, string? table = null) 
+        : base(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
+    {
+        Id = nameof(IdentityUser.Id).ToSqlColumn(NamingPolicy);
+        NormalizedEmail = nameof(IdentityUser.NormalizedEmail).ToSqlColumn(NamingPolicy);
+        NormalizedUserName = nameof(IdentityUser.NormalizedUserName).ToSqlColumn(NamingPolicy);
+    }
 }
