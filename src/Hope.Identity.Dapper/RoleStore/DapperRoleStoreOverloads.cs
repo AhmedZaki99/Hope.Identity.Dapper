@@ -37,8 +37,22 @@ public abstract class DapperRoleStore
 /// </summary>
 /// <inheritdoc/>
 public class DapperRoleStore<TRole>
-    : DapperRoleStore<TRole, IdentityUserRole<string>, IdentityRoleClaim<string>>
+    : DapperRoleStore<TRole, string>
     where TRole : IdentityRole<string>
+{
+    /// <inheritdoc/>
+    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
+        : base(dbDataSource, describer, tableNamingPolicy) { }
+}
+
+/// <summary>
+/// Provides an implementation for a Dapper-based Identity role store using default Identity models.
+/// </summary>
+/// <inheritdoc/>
+public class DapperRoleStore<TRole, TKey>
+    : DapperRoleStore<TRole, TKey, IdentityUserRole<TKey>, IdentityRoleClaim<TKey>>
+    where TRole : IdentityRole<TKey>
+    where TKey : IEquatable<TKey>
 {
     /// <inheritdoc/>
     public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 

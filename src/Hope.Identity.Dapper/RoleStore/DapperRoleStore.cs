@@ -5,18 +5,19 @@ using Microsoft.AspNetCore.Identity;
 namespace Hope.Identity.Dapper;
 
 /// <summary>
-/// Provides an implementation for a Dapper-based Identity role store using <see cref="string"/> keys.
+/// Provides an implementation for a Dapper-based Identity role store.
 /// </summary>
 /// <remarks>
 /// This class exposes <see cref="ExtraRoleInsertProperties"/> and <see cref="ExtraRoleUpdateProperties"/> properties
 /// to implement functionality required in <see cref="DapperRoleStoreBase{TRole, TKey, TUserRole, TRoleClaim}"/>
 /// </remarks>
 /// <inheritdoc/>
-public class DapperRoleStore<TRole, TUserRole, TRoleClaim>
-    : DapperRoleStoreBase<TRole, string, TUserRole, TRoleClaim>
-    where TRole : IdentityRole<string>
-    where TUserRole : IdentityUserRole<string>, new()
-    where TRoleClaim : IdentityRoleClaim<string>, new()
+public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
+    : DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
+    where TRole : IdentityRole<TKey>
+    where TKey : IEquatable<TKey>
+    where TUserRole : IdentityUserRole<TKey>, new()
+    where TRoleClaim : IdentityRoleClaim<TKey>, new()
 {
     /// <summary>
     /// Gets an array of the extra property names within <typeparamref name="TRole"/> used for insert queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
@@ -55,15 +56,6 @@ public class DapperRoleStore<TRole, TUserRole, TRoleClaim>
         ExtraRoleInsertProperties = [];
         ExtraRoleUpdateProperties = [];
     }
-
-
-    /// <remarks></remarks>
-    /// <inheritdoc/>
-    protected override string GenerateNewKey() => Guid.NewGuid().ToString();
-
-    /// <inheritdoc/>
-    protected override string ConvertStringToKey(string key) => key;
-
 
     /// <inheritdoc/>
     protected override string[] GetRoleInsertProperties(string[] identityUserInsertProperties) => [.. identityUserInsertProperties, .. ExtraRoleInsertProperties];

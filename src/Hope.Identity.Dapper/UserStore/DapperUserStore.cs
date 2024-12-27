@@ -5,22 +5,23 @@ using Microsoft.AspNetCore.Identity;
 namespace Hope.Identity.Dapper;
 
 /// <summary>
-/// Provides an implementation for a Dapper-based Identity user store using <see cref="string"/> keys.
+/// Provides an implementation for a Dapper-based Identity user store.
 /// </summary>
 /// <remarks>
 /// This class exposes <see cref="ExtraUserInsertProperties"/> and <see cref="ExtraUserUpdateProperties"/> properties
 /// to implement functionality required in <see cref="DapperUserStoreBase{TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim}"/>
 /// </remarks>
 /// <inheritdoc/>
-public class DapperUserStore<TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>
-    : DapperUserStoreBase<TUser, TRole, string, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>
-    where TUser : IdentityUser<string>
-    where TRole : IdentityRole<string>
-    where TUserClaim : IdentityUserClaim<string>, new()
-    where TUserRole : IdentityUserRole<string>, new()
-    where TUserLogin : IdentityUserLogin<string>, new()
-    where TUserToken : IdentityUserToken<string>, new()
-    where TRoleClaim : IdentityRoleClaim<string>, new()
+public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>
+    : DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>
+    where TUser : IdentityUser<TKey>
+    where TRole : IdentityRole<TKey>
+    where TKey : IEquatable<TKey>
+    where TUserClaim : IdentityUserClaim<TKey>, new()
+    where TUserRole : IdentityUserRole<TKey>, new()
+    where TUserLogin : IdentityUserLogin<TKey>, new()
+    where TUserToken : IdentityUserToken<TKey>, new()
+    where TRoleClaim : IdentityRoleClaim<TKey>, new()
 {
     /// <summary>
     /// Gets an array of the extra property names within <typeparamref name="TUser"/> used for insert queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
@@ -59,14 +60,6 @@ public class DapperUserStore<TUser, TRole, TUserClaim, TUserRole, TUserLogin, TU
         ExtraUserInsertProperties = [];
         ExtraUserUpdateProperties = [];
     }
-
-
-    /// <remarks></remarks>
-    /// <inheritdoc/>
-    protected override string GenerateNewKey() => Guid.NewGuid().ToString();
-
-    /// <inheritdoc/>
-    protected override string ConvertStringToKey(string key) => key;
 
 
     /// <inheritdoc/>

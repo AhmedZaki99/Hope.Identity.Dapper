@@ -170,30 +170,26 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     /// <returns>The base SQL condition used for all user queries.</returns>
     protected virtual string GetBaseUserSqlCondition(string tableAlias = "") => "TRUE";
 
+    /// <summary>
+    /// Generates a new key for a created user (<see langword="default(TKey)"/> to use the database key generation).
+    /// </summary>
+    /// <remarks>
+    /// If the key type is <see cref="string"/> or <see cref="Guid"/>, the default implementation will return a new <see cref="Guid"/> string.
+    /// Otherwise, the default implementation returns <see langword="default(TKey)"/>.
+    /// </remarks>
+    /// <returns>The new key or <see langword="default(TKey)"/> to use the database key generation.</returns>
+    protected virtual TKey? GenerateNewKey()
+    {
+        if (typeof(TKey) == typeof(string) || typeof(TKey) == typeof(Guid))
+        {
+            return ConvertIdFromString(Guid.NewGuid().ToString());
+        }
+        return default;
+    }
+
     #endregion
 
     #region Abstract Methods
-
-    /// <summary>
-    /// Generates a new key for a created user.
-    /// </summary>
-    /// <remarks>
-    /// When implemented for reference-type <typeparamref name="TKey"/>, return <see langword="null"/> if you want to use the database key generation.
-    /// <code>
-    /// // For example:
-    /// protected override string GenerateNewKey() => null!;
-    /// </code>
-    /// </remarks>
-    /// <returns>The new key.</returns>
-    protected abstract TKey GenerateNewKey();
-
-    /// <summary>
-    /// Converts a string key to the key type used by the database (<typeparamref name="TKey"/>).
-    /// </summary>
-    /// <param name="key">The string key to convert.</param>
-    /// <returns>The converted key.</returns>
-    protected abstract TKey ConvertStringToKey(string key);
-
 
     /// <summary>
     /// Should be implemented to get the full list of property names used to insert a new user.
@@ -248,7 +244,12 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     /// <inheritdoc/>
     public override Task<TUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
     {
-        return FindUserAsync(ConvertStringToKey(userId), cancellationToken);
+        var convertedId = ConvertIdFromString(userId);
+        if (convertedId is null)
+        {
+            return Task.FromResult<TUser?>(null);
+        }
+        return FindUserAsync(convertedId, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -286,7 +287,10 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
-        user.Id = GenerateNewKey();
+        if (user.Id.Equals(default))
+        {
+            user.Id = GenerateNewKey() ?? user.Id; 
+        }
         var propertyNames = GetUserInsertProperties(IdentityUserInsertProperties);
 
         var insertCount = await connection.ExecuteAsync(
@@ -521,19 +525,22 @@ public abstract class DapperUserStoreBase<TUser, TRole, TKey, TUserClaim, TUserR
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
+        var userLogin = CreateUserLogin(user, login);
+
+        string[] propertyNames = [
+            nameof(userLogin.UserId),
+            nameof(userLogin.LoginProvider),
+            nameof(userLogin.ProviderKey),
+            nameof(userLogin.ProviderDisplayName)
+        ];
+
         await connection.ExecuteAsync(
             $"""
             INSERT INTO {UserLoginNames.Table} 
-            ({UserLoginNames.UserId}, {UserLoginNames.LoginProvider}, {UserLoginNames.ProviderKey}, {UserLoginNames.ProviderDisplayName}) 
-            VALUES (@userId, @loginProvider, @providerKey, @providerDisplayName)
+            {propertyNames.BuildSqlColumnsBlock(TableNamingPolicy)} 
+            VALUES {propertyNames.BuildSqlParametersBlock()}
             """,
-            new
-            {
-                userId = user.Id,
-                loginProvider = login.LoginProvider,
-                providerKey = login.ProviderKey,
-                providerDisplayName = login.ProviderDisplayName
-            });
+            userLogin);
     }
 
     /// <inheritdoc/>

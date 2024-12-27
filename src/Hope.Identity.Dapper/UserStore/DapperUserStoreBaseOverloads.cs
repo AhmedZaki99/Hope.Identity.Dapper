@@ -40,13 +40,6 @@ public abstract class DapperUserStoreBase<TUser, TRole>
 {
     /// <inheritdoc/>
     public DapperUserStoreBase(DbDataSource dbDataSource, IdentityErrorDescriber? describer) : base(dbDataSource, describer) { }
-
-
-    /// <inheritdoc/>
-    protected override string GenerateNewKey() => Guid.NewGuid().ToString();
-
-    /// <inheritdoc/>
-    protected override string ConvertStringToKey(string key) => key;
 }
 
 /// <summary>

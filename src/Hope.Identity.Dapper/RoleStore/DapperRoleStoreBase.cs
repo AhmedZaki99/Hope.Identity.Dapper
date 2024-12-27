@@ -99,28 +99,28 @@ public abstract class DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
 
     #endregion
 
-    #region Abstract Methods
+    #region Virtual Methods
 
     /// <summary>
-    /// Generates a new key for a created role.
+    /// Generates a new key for a created role (<see langword="default(TKey)"/> to use the database key generation).
     /// </summary>
     /// <remarks>
-    /// When implemented for reference-type <typeparamref name="TKey"/>, return <see langword="null"/> if you want to use the database key generation.
-    /// <code>
-    /// // For example:
-    /// protected override string GenerateNewKey() => null!;
-    /// </code>
+    /// If the key type is <see cref="string"/> or <see cref="Guid"/>, the default implementation will return a new <see cref="Guid"/> string.
+    /// Otherwise, the default implementation returns <see langword="default(TKey)"/>.
     /// </remarks>
-    /// <returns>The new key.</returns>
-    protected abstract TKey GenerateNewKey();
+    /// <returns>The new key or <see langword="default(TKey)"/> to use the database key generation.</returns>
+    protected virtual TKey? GenerateNewKey()
+    {
+        if (typeof(TKey) == typeof(string) || typeof(TKey) == typeof(Guid))
+        {
+            return ConvertIdFromString(Guid.NewGuid().ToString());
+        }
+        return default;
+    }
 
-    /// <summary>
-    /// Converts a string key to the key type used by the database (<typeparamref name="TKey"/>).
-    /// </summary>
-    /// <param name="key">The string key to convert.</param>
-    /// <returns>The converted key.</returns>
-    protected abstract TKey ConvertStringToKey(string key);
+    #endregion
 
+    #region Abstract Methods
 
     /// <summary>
     /// Should be implemented to get the full list of property names used to insert a new role.
@@ -160,13 +160,18 @@ public abstract class DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
     /// <inheritdoc/>
     public override async Task<TRole?> FindByIdAsync(string id, CancellationToken cancellationToken = default)
     {
+        var convertedId = ConvertIdFromString(id);
+        if (convertedId is null)
+        {
+            return null;
+        }
         using var connection = DbDataSource.CreateConnection();
 
         return await connection.QuerySingleOrDefaultAsync<TRole>(
             $"""
             SELECT * FROM {RoleNames.Table} WHERE {RoleNames.Id} = @roleId LIMIT 1
             """, 
-            new { roleId = ConvertStringToKey(id) });
+            new { roleId = convertedId });
     }
 
     /// <inheritdoc/>
@@ -200,7 +205,10 @@ public abstract class DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
-        role.Id = GenerateNewKey();
+        if (role.Id.Equals(default))
+        {
+            role.Id = GenerateNewKey() ?? role.Id;
+        }
         var propertyNames = GetRoleInsertProperties(IdentityRoleInsertProperties);
 
         var insertCount = await connection.ExecuteAsync(
@@ -259,17 +267,21 @@ public abstract class DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
+        var roleClaim = CreateRoleClaim(role, claim);
+
+        string[] propertyNames = [
+            nameof(roleClaim.RoleId),
+            nameof(roleClaim.ClaimType),
+            nameof(roleClaim.ClaimValue)
+        ];
+
         await connection.ExecuteAsync(
             $"""
-            INSERT INTO {RoleClaimNames.Table} ({RoleClaimNames.RoleId}, {RoleClaimNames.ClaimType}, {RoleClaimNames.ClaimValue})
-            VALUES (@roleId, @claimType, @claimValue)
+            INSERT INTO {RoleClaimNames.Table} 
+            {propertyNames.BuildSqlColumnsBlock(TableNamingPolicy)}
+            VALUES {propertyNames.BuildSqlParametersBlock()}
             """,
-            new
-            {
-                roleId = role.Id,
-                claimType = claim.Type,
-                claimValue = claim.Value
-            });
+            propertyNames);
     }
 
     /// <inheritdoc/>
@@ -277,17 +289,20 @@ public abstract class DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
+        var roleClaim = CreateRoleClaim(role, claim);
+
+        string[] propertyNames = [
+            nameof(roleClaim.RoleId),
+            nameof(roleClaim.ClaimType),
+            nameof(roleClaim.ClaimValue)
+        ];
+
         await connection.ExecuteAsync(
             $"""
             DELETE FROM {RoleClaimNames.Table}
-            WHERE ({RoleClaimNames.RoleId}, {RoleClaimNames.ClaimType}, {RoleClaimNames.ClaimValue}) = (@roleId, @claimType, @claimValue)
+            WHERE {propertyNames.BuildSqlColumnsBlock(TableNamingPolicy)} = {propertyNames.BuildSqlParametersBlock()}
             """,
-            new
-            {
-                roleId = role.Id,
-                claimType = claim.Type,
-                claimValue = claim.Value
-            });
+            propertyNames);
     }
 
     #endregion
