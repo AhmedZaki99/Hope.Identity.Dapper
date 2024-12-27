@@ -12,5 +12,6 @@
 
 ## Published Packages
 
-- [Hope.Results](https://github.com/AhmedZaki99/Hope.Public.NuGet/tree/master/src/Hope.Results)
+- [Hope.Identity.Dapper](https://github.com/AhmedZaki99/Hope.Public.NuGet/tree/master/src/Hope.Identity.Dapper)
 - [Hope.Configuration.Extensions](https://github.com/AhmedZaki99/Hope.Public.NuGet/tree/master/src/Hope.Configuration.Extensions)
+- [Hope.Results](https://github.com/AhmedZaki99/Hope.Public.NuGet/tree/master/src/Hope.Results)
