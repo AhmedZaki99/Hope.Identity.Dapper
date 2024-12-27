@@ -12,8 +12,8 @@ namespace Hope.Identity.Dapper;
 /// <remarks>
 /// The default pre-conversion table name is "Users", which the provided <paramref name="namingPolicy"/> use to set the default table name.
 /// </remarks>
-public class UserTableNames<TKey>(JsonNamingPolicy namingPolicy, string? table = null)
-    : TableNames(table ?? namingPolicy.ConvertName(DefaultPascalCaseTable), namingPolicy)
+public class UserTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, string? table = null)
+    : TableNames(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
     where TKey : IEquatable<TKey>
 {
     /// <summary>

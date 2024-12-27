@@ -30,7 +30,7 @@ public class DapperRoleStore<TRole, TUserRole, TRoleClaim>
 
 
     /// <inheritdoc/>
-    protected override JsonNamingPolicy TableNamingPolicy { get; }
+    protected override JsonNamingPolicy? TableNamingPolicy { get; }
 
 
     /// <summary>
@@ -39,7 +39,7 @@ public class DapperRoleStore<TRole, TUserRole, TRoleClaim>
     /// <param name="dbDataSource">The <see cref="DbDataSource"/> used to create database connections.</param>
     /// <param name="describer">The <see cref="IdentityErrorDescriber"/> used to describe store errors.</param>
     /// <param name="tableNamingPolicy">
-    /// The naming policy used to convert property names to SQL table names and/or column names.
+    /// The naming policy used to convert property names to SQL table names and/or column names (<see langword="null"/> for no conversion).
     /// <br/><br/>
     /// For example, a naming policy like <see cref="JsonNamingPolicy.SnakeCaseLower"/> will build a query like this:
     /// <code>
@@ -47,7 +47,7 @@ public class DapperRoleStore<TRole, TUserRole, TRoleClaim>
     /// VALUES (@Id, @Name, @NormalizedName, ...)
     /// </code>
     /// </param>
-    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
+    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy? tableNamingPolicy = null) 
         : base(dbDataSource, describer) 
     {
         TableNamingPolicy = tableNamingPolicy;

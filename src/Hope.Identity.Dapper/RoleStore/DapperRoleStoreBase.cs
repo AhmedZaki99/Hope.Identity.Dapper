@@ -24,7 +24,7 @@ public abstract class DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
     #region Protected Properties
 
     /// <summary>
-    /// Gets the <see cref="JsonNamingPolicy"/> used to convert property names to SQL table names and/or column names.
+    /// Gets the <see cref="JsonNamingPolicy"/> used to convert property names to SQL table names and/or column names (<see langword="null"/> for no conversion).
     /// </summary>
     /// <remarks>
     /// For example, the following implementation:
@@ -37,7 +37,7 @@ public abstract class DapperRoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
     /// VALUES (@Id, @Name, @NormalizedName, ...)
     /// </code>
     /// </remarks>
-    protected abstract JsonNamingPolicy TableNamingPolicy { get; }
+    protected abstract JsonNamingPolicy? TableNamingPolicy { get; }
 
 
     /// <summary>

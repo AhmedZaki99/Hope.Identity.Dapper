@@ -6,14 +6,16 @@ namespace Hope.Identity.Dapper;
 /// <summary>
 /// Represents the table and column names for the user token table.
 /// </summary>
-/// <param name="namingPolicy">The naming policy to use for converting the <see cref="IdentityUserToken{TKey}"/> property names to default column names.</param>
+/// <param name="namingPolicy">
+/// The naming policy to use for converting the <see cref="IdentityUserToken{TKey}"/> property names to default column names (<see langword="null"/> for no conversion).
+/// </param>
 /// <param name="table">The name of the table.</param>
 /// <typeparam name="TKey">The type of the primary key for the user token.</typeparam>
 /// <remarks>
 /// The default pre-conversion table name is "UserTokens", which the provided <paramref name="namingPolicy"/> use to set the default table name.
 /// </remarks>
-public class UserTokenTableNames<TKey>(JsonNamingPolicy namingPolicy, string? table = null)
-    : TableNames(table ?? namingPolicy.ConvertName(DefaultPascalCaseTable), namingPolicy)
+public class UserTokenTableNames<TKey>(JsonNamingPolicy? namingPolicy = null, string? table = null)
+    : TableNames(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
     where TKey : IEquatable<TKey>
 {
     /// <summary>

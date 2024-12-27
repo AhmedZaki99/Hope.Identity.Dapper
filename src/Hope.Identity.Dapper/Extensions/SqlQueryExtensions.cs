@@ -23,12 +23,12 @@ public static class SqlQueryExtensions
     /// </code>
     /// </remarks>
     /// <param name="propertyNames">The property names to convert to SQL column names.</param>
-    /// <param name="namingPolicy">The naming policy to use for converting the property names to column names.</param>
+    /// <param name="namingPolicy">The naming policy to use for converting the property names to column names (<see langword="null"/> for no conversion).</param>
     /// <param name="insertLines">Whether to insert new lines between each column name.</param>
     /// <returns>The SQL columns block.</returns>
-    public static string BuildSqlColumnsBlock(this string[] propertyNames, JsonNamingPolicy namingPolicy, bool insertLines = false)
+    public static string BuildSqlColumnsBlock(this string[] propertyNames, JsonNamingPolicy? namingPolicy = null, bool insertLines = false)
     {
-        var queryProperties = propertyNames.Select(namingPolicy.ConvertName);
+        var queryProperties = propertyNames.Select(namingPolicy.TryConvertName);
         if (insertLines)
         {
             queryProperties = queryProperties.Select(name => $"{_lineIndentation}{name}");
@@ -78,11 +78,11 @@ public static class SqlQueryExtensions
     /// Converts a property name to the corresponding SQL column using the provided <paramref name="namingPolicy"/>.
     /// </summary>
     /// <param name="propertyName">The property name to convert to a SQL column name.</param>
-    /// <param name="namingPolicy">The naming policy to use for converting the property name to a column name.</param>
+    /// <param name="namingPolicy">The naming policy to use for converting the property name to a column name (<see langword="null"/> for no conversion).</param>
     /// <returns>The SQL column name.</returns>
-    public static string ToSqlColumn(this string propertyName, JsonNamingPolicy namingPolicy)
+    public static string ToSqlColumn(this string propertyName, JsonNamingPolicy? namingPolicy = null)
     {
-        return namingPolicy.ConvertName(propertyName);
+        return namingPolicy.TryConvertName(propertyName);
     }
 
     /// <summary>
@@ -98,11 +98,23 @@ public static class SqlQueryExtensions
     /// </code>
     /// </remarks>
     /// <param name="propertyName">The property name to convert to a SQL column name.</param>
-    /// <param name="namingPolicy">The naming policy to use for converting the property name to a column name.</param>
+    /// <param name="namingPolicy">The naming policy to use for converting the property name to a column name (<see langword="null"/> for no conversion).</param>
     /// <param name="parameterPrefix">The prefix to add to the parameter name.</param>
     /// <returns>The SQL assignment.</returns>
-    public static string ToSqlAssignment(this string propertyName, JsonNamingPolicy namingPolicy, string parameterPrefix = "@")
+    public static string ToSqlAssignment(this string propertyName, JsonNamingPolicy? namingPolicy = null, string parameterPrefix = "@")
     {
         return $"{propertyName.ToSqlColumn(namingPolicy)} = {parameterPrefix}{propertyName}";
+    }
+
+
+    /// <summary>
+    /// Try to convert the specified name using the provided <paramref name="namingPolicy"/>, or if <see langword="null"/> return the name without conversion.
+    /// </summary>
+    /// <param name="namingPolicy">The naming policy to use for converting the name (<see langword="null"/> for no conversion).</param>
+    /// <param name="name">The name to convert.</param>
+    /// <returns>The converted name or the original name if the naming policy is <see langword="null"/>.</returns>
+    public static string TryConvertName(this JsonNamingPolicy? namingPolicy, string name)
+    {
+        return namingPolicy?.ConvertName(name) ?? name;
     }
 }

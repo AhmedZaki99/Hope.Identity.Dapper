@@ -34,7 +34,7 @@ public class DapperUserStore<TUser, TRole, TUserClaim, TUserRole, TUserLogin, TU
 
 
     /// <inheritdoc/>
-    protected override JsonNamingPolicy TableNamingPolicy { get; }
+    protected override JsonNamingPolicy? TableNamingPolicy { get; }
 
 
     /// <summary>
@@ -43,7 +43,7 @@ public class DapperUserStore<TUser, TRole, TUserClaim, TUserRole, TUserLogin, TU
     /// <param name="dbDataSource">The <see cref="DbDataSource"/> used to create database connections.</param>
     /// <param name="describer">The <see cref="IdentityErrorDescriber"/> used to describe store errors.</param>
     /// <param name="tableNamingPolicy">
-    /// The naming policy used to convert property names to SQL table names and/or column names.
+    /// The naming policy used to convert property names to SQL table names and/or column names (<see langword="null"/> for no conversion).
     /// <br/><br/>
     /// For example, a naming policy like <see cref="JsonNamingPolicy.SnakeCaseLower"/> will build a query like this:
     /// <code>
@@ -51,7 +51,7 @@ public class DapperUserStore<TUser, TRole, TUserClaim, TUserRole, TUserLogin, TU
     /// VALUES (@Id, @UserName, @NormalizedUserName, @Email, @NormalizedEmail, ...)
     /// </code>
     /// </param>
-    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy tableNamingPolicy) 
+    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, JsonNamingPolicy? tableNamingPolicy = null) 
         : base(dbDataSource, describer) 
     {
         TableNamingPolicy = tableNamingPolicy;
