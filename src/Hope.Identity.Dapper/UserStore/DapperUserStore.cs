@@ -26,12 +26,12 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     /// <summary>
     /// Gets an array of the extra property names within <typeparamref name="TUser"/> used for insert queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
     /// </summary>
-    protected virtual string[] ExtraUserInsertProperties { get; }
+    protected virtual string[] ExtraUserInsertProperties { get; set; }
 
     /// <summary>
     /// Gets an array of the extra property names within <typeparamref name="TUser"/> used for update queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
     /// </summary>
-    protected virtual string[] ExtraUserUpdateProperties { get; }
+    protected virtual string[] ExtraUserUpdateProperties { get; set; }
 
 
     /// <inheritdoc/>

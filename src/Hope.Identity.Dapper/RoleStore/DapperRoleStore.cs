@@ -22,12 +22,12 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
     /// <summary>
     /// Gets an array of the extra property names within <typeparamref name="TRole"/> used for insert queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
     /// </summary>
-    protected virtual string[] ExtraRoleInsertProperties { get; }
+    protected virtual string[] ExtraRoleInsertProperties { get; set; }
 
     /// <summary>
     /// Gets an array of the extra property names within <typeparamref name="TRole"/> used for update queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
     /// </summary>
-    protected virtual string[] ExtraRoleUpdateProperties { get; }
+    protected virtual string[] ExtraRoleUpdateProperties { get; set; }
 
 
     /// <inheritdoc/>

@@ -14,13 +14,13 @@ public abstract class DapperRoleStore
     /// Typically returns an empty array.
     /// </remarks>
     /// <inheritdoc/>
-    protected sealed override string[] ExtraRoleInsertProperties { get; }
+    protected sealed override string[] ExtraRoleInsertProperties { get; set; }
 
     /// <remarks>
     /// Typically returns an empty array.
     /// </remarks>
     /// <inheritdoc/>
-    protected sealed override string[] ExtraRoleUpdateProperties { get; }
+    protected sealed override string[] ExtraRoleUpdateProperties { get; set; }
 
 
     /// <inheritdoc/>

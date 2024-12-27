@@ -14,13 +14,13 @@ public class DapperUserStore
     /// Typically returns an empty array.
     /// </remarks>
     /// <inheritdoc/>
-    protected sealed override string[] ExtraUserInsertProperties { get; }
+    protected sealed override string[] ExtraUserInsertProperties { get; set; }
 
     /// <remarks>
     /// Typically returns an empty array.
     /// </remarks>
     /// <inheritdoc/>
-    protected sealed override string[] ExtraUserUpdateProperties { get; }
+    protected sealed override string[] ExtraUserUpdateProperties { get; set; }
 
 
     /// <inheritdoc/>
