@@ -106,24 +106,6 @@ public class DapperStoreOptions
 
 
     /// <summary>
-    /// Gets or sets the base SQL condition delegate used for all user queries. Defaults to return "TRUE" (no base condition).
-    /// </summary>
-    /// <remarks>
-    /// This base condition is helpful to limit the set of users affected by SELECT, INSERT, UPDATE, and DELETE queries. 
-    /// For example:
-    /// <code>
-    /// BaseUserSqlConditionGetter = tableAlias =>
-    /// {
-    ///     var tablePrefix = string.IsNullOrEmpty(tableAlias) ? string.Empty : $"{tableAlias}.";
-    ///     
-    ///     return $"{tablePrefix}{nameof(User.TenantId).ToSqlColumn(TableNamingPolicy)} = @{nameof(User.TenantId)}";
-    /// }
-    /// </code>
-    /// </remarks>
-    public SqlStatementDelegate BaseUserSqlConditionGetter { get; set; }
-
-
-    /// <summary>
     /// Creates a new instance of <see cref="DapperStoreOptions"/>.
     /// </summary>
     public DapperStoreOptions()
@@ -140,8 +122,6 @@ public class DapperStoreOptions
         ExtraUserUpdateProperties = [];
         ExtraRoleInsertProperties = [];
         ExtraRoleUpdateProperties = [];
-
-        BaseUserSqlConditionGetter = _ => "TRUE";
     }
 
 }

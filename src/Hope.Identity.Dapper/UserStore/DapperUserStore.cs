@@ -141,6 +141,27 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
         return [.. IdentityUserUpdateProperties, .. Options.ExtraUserUpdateProperties];
     }
 
+    /// <summary>
+    /// Gets the base SQL condition used for all user queries. When not overridden returns "TRUE" (no base condition).
+    /// </summary>
+    /// <remarks>
+    /// This base condition is helpful to limit the set of users affected by the current implementation of the store, for example:
+    /// <code>
+    /// protected override string GetBaseUserSqlCondition(DynamicParameters sqlParameters, string tableAlias = "")
+    /// {
+    ///     sqlParameters.Add("tenantId", _currentTenantId);
+    /// 
+    ///     var columnPrefix = string.IsNullOrEmpty(tableAlias) ? string.Empty : $"{tableAlias}.";
+    ///     return $"{columnPrefix}{nameof(User.TenantId).ToSqlColumn(Options.TableNamingPolicy)} = @tenantId";
+    /// }
+    /// </code>
+    /// Notice that the <paramref name="sqlParameters"/> argument should be used to add any parameters included in the returned condition.
+    /// </remarks>
+    /// <param name="sqlParameters">The <see cref="DynamicParameters"/> used to add SQL parameters.</param>
+    /// <param name="tableAlias">The alias to use for the user table.</param>
+    /// <returns>The base SQL condition used for all user queries.</returns>
+    protected virtual string GetBaseUserSqlCondition(DynamicParameters sqlParameters, string tableAlias = "") => "TRUE";
+
     #endregion
 
     #region Queryable Store Implementation
@@ -157,14 +178,16 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
+        var dynamicParams = new DynamicParameters(new { userId });
+
         return await connection.QuerySingleOrDefaultAsync<TUser>(
             $"""
             SELECT * FROM {TablePrefix}{Options.UserNames.Table} 
-            WHERE {Options.BaseUserSqlConditionGetter()} 
+            WHERE {GetBaseUserSqlCondition(dynamicParams)} 
             AND {Options.UserNames.Id} = @userId 
             LIMIT 1
             """,
-            new { userId });
+            dynamicParams);
     }
 
     /// <inheritdoc/>
@@ -183,14 +206,16 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
+        var dynamicParams = new DynamicParameters(new { normalizedUserName });
+
         return await connection.QuerySingleOrDefaultAsync<TUser>(
             $"""
             SELECT * FROM {TablePrefix}{Options.UserNames.Table} 
-            WHERE {Options.BaseUserSqlConditionGetter()} 
+            WHERE {GetBaseUserSqlCondition(dynamicParams)} 
             AND {Options.UserNames.NormalizedUserName} = @normalizedUserName 
             LIMIT 1
             """,
-            new { normalizedUserName });
+            dynamicParams);
     }
 
     /// <inheritdoc/>
@@ -198,14 +223,16 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
+        var dynamicParams = new DynamicParameters(new { normalizedEmail });
+
         return await connection.QuerySingleOrDefaultAsync<TUser>(
             $"""
             SELECT * FROM {TablePrefix}{Options.UserNames.Table} 
-            WHERE {Options.BaseUserSqlConditionGetter()} 
+            WHERE {GetBaseUserSqlCondition(dynamicParams)} 
             AND {Options.UserNames.NormalizedEmail} = @normalizedEmail 
             LIMIT 1
             """,
-            new { normalizedEmail });
+            dynamicParams);
     }
 
     /// <inheritdoc/>
@@ -237,16 +264,17 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
         var propertyNames = GetUserUpdateProperties();
+        var dynamicParams = new DynamicParameters(user);
 
         var updateCount = await connection.ExecuteAsync(
             $"""
             UPDATE {TablePrefix}{Options.UserNames.Table} 
             SET {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy, insertLines: true)}
             = {propertyNames.BuildSqlParametersBlock(insertLines: true)}
-            WHERE {Options.BaseUserSqlConditionGetter()} 
+            WHERE {GetBaseUserSqlCondition(dynamicParams)} 
             AND {Options.UserNames.Id} = @{nameof(user.Id)};
             """,
-            user);
+            dynamicParams);
 
         return updateCount > 0
             ? IdentityResult.Success
@@ -258,13 +286,15 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
+        var dynamicParams = new DynamicParameters(new { userId = user.Id });
+
         await connection.ExecuteAsync(
             $"""
             DELETE FROM {TablePrefix}{Options.UserNames.Table}
-            WHERE {Options.BaseUserSqlConditionGetter()} 
+            WHERE {GetBaseUserSqlCondition(dynamicParams)} 
             AND {Options.UserNames.Id} = @userId
             """,
-            new { userId = user.Id });
+            dynamicParams);
 
         return IdentityResult.Success;
     }
@@ -292,16 +322,18 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
+        var dynamicParams = new DynamicParameters(new { claimType = claim.Type, claimValue = claim.Value });
+
         var result = await connection.QueryAsync<TUser>(
             $"""
             SELECT u.* FROM {TablePrefix}{Options.UserNames.Table} u
             JOIN {TablePrefix}{Options.UserClaimNames.Table} uc 
             ON u.{Options.UserNames.Id} = uc.{Options.UserClaimNames.UserId}
-            WHERE {Options.BaseUserSqlConditionGetter("u")}
+            WHERE {GetBaseUserSqlCondition(dynamicParams, tableAlias: "u")}
             AND uc.{Options.UserClaimNames.ClaimType} = @claimType 
             AND uc.{Options.UserClaimNames.ClaimValue} = @claimValue
             """,
-            new { claimType = claim.Type, claimValue = claim.Value });
+            dynamicParams);
 
         return result.ToList();
     }
