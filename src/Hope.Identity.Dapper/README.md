@@ -73,13 +73,6 @@ builder.Services.AddIdentity<CustomUser, IdentityRole<Guid>>()
         options.TableNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
         options.UserNames.Table = "custom_users";
 
-        options.BaseUserSqlConditionGetter = tableAlias => 
-        {
-            var tablePrefix = string.IsNullOrEmpty(tableAlias) ? string.Empty : $"{tableAlias}.";
-
-            return $"{tablePrefix}is_deleted = FALSE";
-        };
-
         options.ExtraUserInsertProperties = [
             nameof(CustomUser.CreatedOn), nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
 
@@ -101,21 +94,35 @@ public class CustomUser : IdentityUser<Guid>
 
 public class CustomUserStore : DapperUserStore<CustomUser, IdentityRole<Guid>, Guid>
 {
-    public CustomUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
-        : base(dbDataSource, options, describer) { }
+    private readonly string _tabelPrefix;
+    private readonly string _isDeletedColumn;
 
+    public CustomUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+        : base(dbDataSource, options, describer) 
+    { 
+        _tabelPrefix = Options.TableSchema is null ? string.Empty : $"{Options.TableSchema}.";
+        _isDeletedColumn = nameof(CustomUser.IsDeleted).ToSqlColumn(Options.TableNamingPolicy);
+    }
+
+
+    public override string GetBaseUserSqlCondition(DynamicParameters sqlParameters, string tableAlias = "")
+    {
+        var columnPrefix = string.IsNullOrEmpty(tableAlias) ? string.Empty : $"{tableAlias}.";
+
+        return $"{columnPrefix}{_isDeletedColumn} = FALSE";
+    }
 
     public override async Task<IdentityResult> DeleteAsync(AppUser user, CancellationToken cancellationToken = default)
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
-        var tabelPrefix = Options.TableSchema is null ? string.Empty : $"{Options.TableSchema}.";
-        var isDeletedColumn = nameof(CustomUser.IsDeleted).ToSqlColumn(Options.TableNamingPolicy);
+        var dynamicParams = new DynamicParameters(new { userId = user.Id });
 
         await connection.ExecuteAsync(
             $"""
-            UPDATE {tabelPrefix}{Options.UserNames.Table} SET {isDeletedColumn} = TRUE 
-            WHERE {isDeletedColumn} = FALSE AND {Options.UserNames.Id} = @userId
+            UPDATE {_tabelPrefix}{Options.UserNames.Table} SET {_isDeletedColumn} = TRUE 
+            WHERE {GetBaseUserSqlCondition(dynamicParams)} 
+            AND {Options.UserNames.Id} = @userId
             """,
             new { userId = user.Id });
 
