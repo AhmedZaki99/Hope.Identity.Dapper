@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using Dapper;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +21,13 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
     where TUserRole : IdentityUserRole<TKey>, new()
     where TRoleClaim : IdentityRoleClaim<TKey>, new()
 {
+
+    #region Private Properties
+
+    [field: MaybeNull]
+    private string TablePrefix => field ??= Options.TableSchema is null ? string.Empty : $"{Options.TableSchema}.";
+
+    #endregion
 
     #region Protected Properties
 
@@ -140,7 +148,7 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
 
         return await connection.QuerySingleOrDefaultAsync<TRole>(
             $"""
-            SELECT * FROM {Options.RoleNames.Table} WHERE {Options.RoleNames.Id} = @roleId LIMIT 1
+            SELECT * FROM {TablePrefix}{Options.RoleNames.Table} WHERE {Options.RoleNames.Id} = @roleId LIMIT 1
             """, 
             new { roleId = convertedId });
     }
@@ -152,7 +160,7 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
 
         return await connection.QuerySingleOrDefaultAsync<TRole>(
             $"""
-            SELECT * FROM {Options.RoleNames.Table} WHERE {Options.RoleNames.NormalizedName} = @normalizedName LIMIT 1
+            SELECT * FROM {TablePrefix}{Options.RoleNames.Table} WHERE {Options.RoleNames.NormalizedName} = @normalizedName LIMIT 1
             """,
             new { normalizedName });
     }
@@ -164,7 +172,7 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
 
         var result = await connection.QueryAsync<TRoleClaim>(
             $"""
-            SELECT * FROM {Options.RoleClaimNames.Table} WHERE {Options.RoleClaimNames.RoleId} = @roleId
+            SELECT * FROM {TablePrefix}{Options.RoleClaimNames.Table} WHERE {Options.RoleClaimNames.RoleId} = @roleId
             """,
             new { roleId = role.Id });
 
@@ -184,7 +192,7 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
 
         var insertCount = await connection.ExecuteAsync(
             $"""
-            INSERT INTO {Options.RoleNames.Table} {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy, insertLines: true)}
+            INSERT INTO {TablePrefix}{Options.RoleNames.Table} {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy, insertLines: true)}
             VALUES {propertyNames.BuildSqlParametersBlock(insertLines: true)};
             """,
             role);
@@ -203,7 +211,7 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
 
         var updateCount = await connection.ExecuteAsync(
             $"""
-            UPDATE {Options.RoleNames.Table} 
+            UPDATE {TablePrefix}{Options.RoleNames.Table} 
             SET {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy, insertLines: true)}
             = {propertyNames.BuildSqlParametersBlock(insertLines: true)}
             WHERE {Options.RoleNames.Id} = @{nameof(role.Id)};
@@ -222,7 +230,7 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
 
         await connection.ExecuteAsync(
             $"""
-            DELETE FROM {Options.RoleNames.Table} WHERE {Options.RoleNames.Id} = @roleId
+            DELETE FROM {TablePrefix}{Options.RoleNames.Table} WHERE {Options.RoleNames.Id} = @roleId
             """,
             new { roleId = role.Id });
 
@@ -248,7 +256,7 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
 
         await connection.ExecuteAsync(
             $"""
-            INSERT INTO {Options.RoleClaimNames.Table} 
+            INSERT INTO {TablePrefix}{Options.RoleClaimNames.Table} 
             {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy)}
             VALUES {propertyNames.BuildSqlParametersBlock()}
             """,
@@ -270,7 +278,7 @@ public class DapperRoleStore<TRole, TKey, TUserRole, TRoleClaim>
 
         await connection.ExecuteAsync(
             $"""
-            DELETE FROM {Options.RoleClaimNames.Table}
+            DELETE FROM {TablePrefix}{Options.RoleClaimNames.Table}
             WHERE {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy)} = {propertyNames.BuildSqlParametersBlock()}
             """,
             propertyNames);

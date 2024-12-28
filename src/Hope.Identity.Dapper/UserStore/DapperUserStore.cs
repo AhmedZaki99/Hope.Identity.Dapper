@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using System.Text;
 using Dapper;
@@ -25,6 +26,13 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     where TUserToken : IdentityUserToken<TKey>, new()
     where TRoleClaim : IdentityRoleClaim<TKey>, new()
 {
+
+    #region Private Properties
+
+    [field: MaybeNull]
+    private string TablePrefix => field ??= Options.TableSchema is null ? string.Empty : $"{Options.TableSchema}.";
+
+    #endregion
 
     #region Protected Properties
 
@@ -151,7 +159,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         return await connection.QuerySingleOrDefaultAsync<TUser>(
             $"""
-            SELECT * FROM {Options.UserNames.Table} 
+            SELECT * FROM {TablePrefix}{Options.UserNames.Table} 
             WHERE {Options.BaseUserSqlConditionGetter()} 
             AND {Options.UserNames.Id} = @userId 
             LIMIT 1
@@ -177,7 +185,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         return await connection.QuerySingleOrDefaultAsync<TUser>(
             $"""
-            SELECT * FROM {Options.UserNames.Table} 
+            SELECT * FROM {TablePrefix}{Options.UserNames.Table} 
             WHERE {Options.BaseUserSqlConditionGetter()} 
             AND {Options.UserNames.NormalizedUserName} = @normalizedUserName 
             LIMIT 1
@@ -192,7 +200,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         return await connection.QuerySingleOrDefaultAsync<TUser>(
             $"""
-            SELECT * FROM {Options.UserNames.Table} 
+            SELECT * FROM {TablePrefix}{Options.UserNames.Table} 
             WHERE {Options.BaseUserSqlConditionGetter()} 
             AND {Options.UserNames.NormalizedEmail} = @normalizedEmail 
             LIMIT 1
@@ -213,7 +221,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var insertCount = await connection.ExecuteAsync(
             $"""
-            INSERT INTO {Options.UserNames.Table} {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy, insertLines: true)}
+            INSERT INTO {TablePrefix}{Options.UserNames.Table} {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy, insertLines: true)}
             VALUES {propertyNames.BuildSqlParametersBlock(insertLines: true)};
             """,
             user);
@@ -232,7 +240,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var updateCount = await connection.ExecuteAsync(
             $"""
-            UPDATE {Options.UserNames.Table} 
+            UPDATE {TablePrefix}{Options.UserNames.Table} 
             SET {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy, insertLines: true)}
             = {propertyNames.BuildSqlParametersBlock(insertLines: true)}
             WHERE {Options.BaseUserSqlConditionGetter()} 
@@ -252,7 +260,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         await connection.ExecuteAsync(
             $"""
-            DELETE FROM {Options.UserNames.Table}
+            DELETE FROM {TablePrefix}{Options.UserNames.Table}
             WHERE {Options.BaseUserSqlConditionGetter()} 
             AND {Options.UserNames.Id} = @userId
             """,
@@ -272,7 +280,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var result = await connection.QueryAsync<TUserClaim>(
             $"""
-            SELECT * FROM {Options.UserClaimNames.Table} WHERE {Options.UserClaimNames.UserId} = @userId
+            SELECT * FROM {TablePrefix}{Options.UserClaimNames.Table} WHERE {Options.UserClaimNames.UserId} = @userId
             """,
             new { userId = user.Id });
 
@@ -286,8 +294,9 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var result = await connection.QueryAsync<TUser>(
             $"""
-            SELECT u.* FROM {Options.UserNames.Table} u
-            JOIN {Options.UserClaimNames.Table} uc ON u.{Options.UserNames.Id} = uc.{Options.UserClaimNames.UserId}
+            SELECT u.* FROM {TablePrefix}{Options.UserNames.Table} u
+            JOIN {TablePrefix}{Options.UserClaimNames.Table} uc 
+            ON u.{Options.UserNames.Id} = uc.{Options.UserClaimNames.UserId}
             WHERE {Options.BaseUserSqlConditionGetter("u")}
             AND uc.{Options.UserClaimNames.ClaimType} = @claimType 
             AND uc.{Options.UserClaimNames.ClaimValue} = @claimValue
@@ -308,8 +317,9 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
         var sqlBuilder = new StringBuilder();
-        sqlBuilder.AppendLine(
-            $"INSERT INTO {Options.UserClaimNames.Table} ({Options.UserClaimNames.UserId}, {Options.UserClaimNames.ClaimType}, {Options.UserClaimNames.ClaimValue}) VALUES");
+
+        sqlBuilder.Append($"INSERT INTO {TablePrefix}{Options.UserClaimNames.Table} ");
+        sqlBuilder.AppendLine($"({Options.UserClaimNames.UserId}, {Options.UserClaimNames.ClaimType}, {Options.UserClaimNames.ClaimValue}) VALUES");
 
         var dynamicParams = new DynamicParameters();
         dynamicParams.Add("userId", user.Id);
@@ -339,7 +349,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         await connection.ExecuteAsync(
             $"""
-            UPDATE {Options.UserClaimNames.Table} 
+            UPDATE {TablePrefix}{Options.UserClaimNames.Table} 
             SET ({Options.UserClaimNames.ClaimType}, {Options.UserClaimNames.ClaimValue}) = (@newClaimType, @newClaimValue)
             WHERE ({Options.UserClaimNames.UserId}, {Options.UserClaimNames.ClaimType}, {Options.UserClaimNames.ClaimValue}) 
             = (@userId, @claimType, @claimValue)
@@ -366,7 +376,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var sqlBuilder = new StringBuilder();
 
-        sqlBuilder.AppendLine($"DELETE FROM {Options.UserClaimNames.Table} WHERE {Options.UserClaimNames.UserId} = @userId");
+        sqlBuilder.AppendLine($"DELETE FROM {TablePrefix}{Options.UserClaimNames.Table} WHERE {Options.UserClaimNames.UserId} = @userId");
         sqlBuilder.Append($"AND ({Options.UserClaimNames.ClaimType}, {Options.UserClaimNames.ClaimValue}) IN (");
 
         var dynamicParams = new DynamicParameters();
@@ -402,7 +412,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         return await connection.QuerySingleOrDefaultAsync<TUserLogin>(
             $"""
-            SELECT * FROM {Options.UserLoginNames.Table} 
+            SELECT * FROM {TablePrefix}{Options.UserLoginNames.Table} 
             WHERE ({Options.UserLoginNames.UserId}, {Options.UserLoginNames.LoginProvider}, {Options.UserLoginNames.ProviderKey}) 
             = (@userId, @loginProvider, @providerKey)
             LIMIT 1
@@ -417,7 +427,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         return await connection.QuerySingleOrDefaultAsync<TUserLogin>(
             $"""
-            SELECT * FROM {Options.UserLoginNames.Table} 
+            SELECT * FROM {TablePrefix}{Options.UserLoginNames.Table} 
             WHERE {Options.UserLoginNames.LoginProvider} = @loginProvider AND {Options.UserLoginNames.ProviderKey} = @providerKey 
             LIMIT 1
             """,
@@ -431,7 +441,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var result = await connection.QueryAsync<TUserLogin>(
             $"""
-            SELECT * FROM {Options.UserLoginNames.Table} WHERE {Options.UserLoginNames.UserId} = @userId
+            SELECT * FROM {TablePrefix}{Options.UserLoginNames.Table} WHERE {Options.UserLoginNames.UserId} = @userId
             """,
             new { userId = user.Id });
 
@@ -456,7 +466,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         await connection.ExecuteAsync(
             $"""
-            INSERT INTO {Options.UserLoginNames.Table} 
+            INSERT INTO {TablePrefix}{Options.UserLoginNames.Table} 
             {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy)} 
             VALUES {propertyNames.BuildSqlParametersBlock()}
             """,
@@ -470,7 +480,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         await connection.ExecuteAsync(
             $"""
-            DELETE FROM {Options.UserLoginNames.Table} 
+            DELETE FROM {TablePrefix}{Options.UserLoginNames.Table} 
             WHERE ({Options.UserLoginNames.UserId}, {Options.UserLoginNames.LoginProvider}, {Options.UserLoginNames.ProviderKey}) 
             = (@userId, @loginProvider, @providerKey)
             """,
@@ -493,7 +503,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         return await connection.QuerySingleOrDefaultAsync<TUserToken>(
             $"""
-            SELECT * FROM {Options.UserTokenNames.Table} 
+            SELECT * FROM {TablePrefix}{Options.UserTokenNames.Table} 
             WHERE ({Options.UserLoginNames.UserId}, {Options.UserLoginNames.LoginProvider}, {Options.UserLoginNames.ProviderKey}) 
             = (@userId, @loginProvider, @name)
             LIMIT 1
@@ -515,7 +525,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         await connection.ExecuteAsync(
             $"""
-            INSERT INTO {Options.UserTokenNames.Table} 
+            INSERT INTO {TablePrefix}{Options.UserTokenNames.Table} 
             {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy)}
             VALUES {propertyNames.BuildSqlParametersBlock()}
             """,
@@ -535,7 +545,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         await connection.ExecuteAsync(
             $"""
-            DELETE FROM {Options.UserTokenNames.Table} 
+            DELETE FROM {TablePrefix}{Options.UserTokenNames.Table} 
             WHERE {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy)} 
             = {propertyNames.BuildSqlParametersBlock()}
             """,
@@ -553,7 +563,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         return await connection.QuerySingleOrDefaultAsync<TRole>(
             $"""
-            SELECT * FROM {Options.RoleNames.Table} 
+            SELECT * FROM {TablePrefix}{Options.RoleNames.Table} 
             WHERE {Options.RoleNames.NormalizedName} = @normalizedRoleName 
             LIMIT 1
             """,
@@ -567,7 +577,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         return await connection.QuerySingleOrDefaultAsync<TUserRole>(
             $"""
-            SELECT * FROM {Options.UserRoleNames.Table} 
+            SELECT * FROM {TablePrefix}{Options.UserRoleNames.Table} 
             WHERE ({Options.UserRoleNames.UserId}, {Options.UserRoleNames.RoleId}) = (@userId, @roleId)
             LIMIT 1
             """,
@@ -581,8 +591,9 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var result = await connection.QueryAsync<string>(
             $"""
-            SELECT r.{Options.RoleNames.Name} FROM {Options.RoleNames.Table} r
-            JOIN {Options.UserRoleNames.Table} ur ON r.{Options.RoleNames.Id} = ur.{Options.UserRoleNames.RoleId}
+            SELECT r.{Options.RoleNames.Name} FROM {TablePrefix}{Options.RoleNames.Table} r
+            JOIN {TablePrefix}{Options.UserRoleNames.Table} ur 
+            ON r.{Options.RoleNames.Id} = ur.{Options.UserRoleNames.RoleId}
             WHERE ur.{Options.UserRoleNames.UserId} = @userId
             """,
             new { userId = user.Id });
@@ -597,9 +608,9 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var result = await connection.QueryAsync<TUser>(
             $"""
-            SELECT u.* FROM {Options.UserNames.Table} u
-            JOIN {Options.UserRoleNames.Table} ur ON u.{Options.UserNames.Id} = ur.{Options.UserRoleNames.UserId}
-            JOIN {Options.RoleNames.Table} r ON ur.{Options.UserRoleNames.RoleId} = r.{Options.RoleNames.Id}
+            SELECT u.* FROM {TablePrefix}{Options.UserNames.Table} u
+            JOIN {TablePrefix}{Options.UserRoleNames.Table} ur ON u.{Options.UserNames.Id} = ur.{Options.UserRoleNames.UserId}
+            JOIN {TablePrefix}{Options.RoleNames.Table} r ON ur.{Options.UserRoleNames.RoleId} = r.{Options.RoleNames.Id}
             WHERE r.{Options.RoleNames.NormalizedName} = @normalizedRoleName
             """,
             new { normalizedRoleName });
@@ -615,8 +626,9 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
         return await connection.ExecuteScalarAsync<bool>(
             $"""
             SELECT EXISTS (
-                SELECT 1 FROM {Options.UserRoleNames.Table} ur
-                JOIN {Options.RoleNames.Table} r ON ur.{Options.UserRoleNames.RoleId} = r.{Options.RoleNames.Id}
+                SELECT 1 FROM {TablePrefix}{Options.UserRoleNames.Table} ur
+                JOIN {TablePrefix}{Options.RoleNames.Table} r 
+                ON ur.{Options.UserRoleNames.RoleId} = r.{Options.RoleNames.Id}
                 WHERE ur.{Options.UserRoleNames.UserId} = @userId AND r.{Options.RoleNames.NormalizedName} = @normalizedRoleName
             )
             """,
@@ -633,7 +645,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         await connection.ExecuteAsync(
             $"""
-            INSERT INTO {Options.UserRoleNames.Table} 
+            INSERT INTO {TablePrefix}{Options.UserRoleNames.Table} 
             ({Options.UserRoleNames.UserId}, {Options.UserRoleNames.RoleId}) 
             VALUES (@userId, @roleId)
             """,
@@ -650,7 +662,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         await connection.ExecuteAsync(
             $"""
-            DELETE FROM {Options.UserRoleNames.Table} 
+            DELETE FROM {TablePrefix}{Options.UserRoleNames.Table} 
             WHERE ({Options.UserRoleNames.UserId}, {Options.UserRoleNames.RoleId}) = (@userId, @roleId)
             """,
             new { userId = user.Id, roleId = role.Id });

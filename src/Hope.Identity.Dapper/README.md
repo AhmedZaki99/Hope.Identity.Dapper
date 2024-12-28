@@ -109,11 +109,12 @@ public class CustomUserStore : DapperUserStore<CustomUser, IdentityRole<Guid>, G
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
+        var tabelPrefix = Options.TableSchema is null ? string.Empty : $"{Options.TableSchema}.";
         var isDeletedColumn = nameof(CustomUser.IsDeleted).ToSqlColumn(Options.TableNamingPolicy);
 
         await connection.ExecuteAsync(
             $"""
-            UPDATE {Options.UserNames.Table} SET {isDeletedColumn} = TRUE 
+            UPDATE {tabelPrefix}{Options.UserNames.Table} SET {isDeletedColumn} = TRUE 
             WHERE {isDeletedColumn} = FALSE AND {Options.UserNames.Id} = @userId
             """,
             new { userId = user.Id });
