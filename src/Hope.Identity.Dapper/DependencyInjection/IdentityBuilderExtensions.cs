@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Hope.Identity.Dapper.DependencyInjection;
 
@@ -17,35 +15,9 @@ public static class IdentityBuilderExtensions
     /// <param name="setupAction">An action to configure the <see cref="DapperStoreOptions"/>.</param>
     /// <returns>The <see cref="IdentityBuilder"/> instance to allow chaining up identity configuration.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static IdentityBuilder AddDapperStores(this IdentityBuilder builder, Action<DapperStoreOptions> setupAction)
+    public static IdentityBuilder AddDapperStores(this IdentityBuilder builder, Action<DapperStoreOptions>? setupAction = null)
     {
-        var identityUserType = FindGenericBaseType(builder.UserType, typeof(IdentityUser<>)) 
-            ?? throw new InvalidOperationException("The user type provided must inherit from IdentityUser<TKey>.");
-
-        var keyType = identityUserType.GenericTypeArguments[0];
-
-        if (builder.RoleType is not null)
-        {
-            if (FindGenericBaseType(builder.RoleType, typeof(IdentityRole<>)) is null)
-            {
-                throw new InvalidOperationException("The role type provided must inherit from IdentityRole<TKey>.");
-            }
-            var roleStoreType = typeof(DapperRoleStore<,>).MakeGenericType(builder.RoleType, keyType);
-
-            builder.Services.TryAddScoped(roleStoreType);
-            builder.Services.TryAddScoped(typeof(IRoleStore<>).MakeGenericType(builder.RoleType), sp => sp.GetRequiredService(roleStoreType));
-        }
-        var userStoreType = builder.RoleType is null
-            ? typeof(DapperUserStore<,>).MakeGenericType(builder.UserType, keyType)
-            : typeof(DapperUserStore<,,>).MakeGenericType(builder.UserType, builder.RoleType, keyType);
-
-        builder.Services.TryAddScoped(userStoreType);
-        builder.Services.TryAddScoped(typeof(IUserStore<>).MakeGenericType(builder.UserType), sp => sp.GetRequiredService(userStoreType));
-
-        if (setupAction != null)
-        {
-            builder.Services.Configure(setupAction);
-        }
+        builder.Services.AddDapperStores(builder.UserType, builder.RoleType, setupAction: setupAction);
         return builder;
     }
 
@@ -60,20 +32,7 @@ public static class IdentityBuilderExtensions
     public static IdentityBuilder AddDapperStores<TUserStore>(this IdentityBuilder builder, Action<DapperStoreOptions> setupAction)
         where TUserStore : class
     {
-        var userStoreType = typeof(TUserStore);
-
-        if (FindGenericBaseType(userStoreType, typeof(DapperUserStore<,,,,,,,>)) is null)
-        {
-            throw new InvalidOperationException("The user store type provided must inherit from DapperUserStore or one of its generic overloads.");
-        }
-
-        builder.Services.TryAddScoped(userStoreType);
-        builder.Services.TryAddScoped(typeof(IUserStore<>).MakeGenericType(builder.UserType), sp => sp.GetRequiredService(userStoreType));
-
-        if (setupAction != null)
-        {
-            builder.Services.Configure(setupAction);
-        }
+        builder.Services.AddDapperStores<TUserStore>(builder.UserType, setupAction: setupAction);
         return builder;
     }
 
@@ -94,38 +53,7 @@ public static class IdentityBuilderExtensions
         {
             throw new InvalidOperationException("The role type must be provided when using this overload.");
         }
-        if (FindGenericBaseType(builder.RoleType, typeof(IdentityRole<>)) is null)
-        {
-            throw new InvalidOperationException("The role type provided must inherit from IdentityRole<TKey>.");
-        }
-
-        var roleStoreType = typeof(TRoleStore);
-
-        if (FindGenericBaseType(roleStoreType, typeof(DapperRoleStore<,,,>)) is null)
-        {
-            throw new InvalidOperationException("The role store type provided must inherit from DapperRoleStore or one of its generic overloads.");
-        }
-
-        builder.Services.TryAddScoped(roleStoreType);
-        builder.Services.TryAddScoped(typeof(IRoleStore<>).MakeGenericType(builder.RoleType), sp => sp.GetRequiredService(roleStoreType));
-
-        return AddDapperStores<TUserStore>(builder, setupAction);
+        builder.Services.AddDapperStores<TUserStore, TRoleStore>(builder.UserType, builder.RoleType, setupAction: setupAction);
+        return builder;
     }
-
-
-    private static Type? FindGenericBaseType(Type currentType, Type genericBaseType)
-    {
-        Type? type = currentType;
-        while (type != null)
-        {
-            var genericType = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
-            if (genericType != null && genericType == genericBaseType)
-            {
-                return type;
-            }
-            type = type.BaseType;
-        }
-        return null;
-    }
-
 }
