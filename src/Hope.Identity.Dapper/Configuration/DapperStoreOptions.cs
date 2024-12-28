@@ -15,7 +15,7 @@ public class DapperStoreOptions
     public string? TableSchema { get; set; }
 
     /// <summary>
-    /// Gets the <see cref="JsonNamingPolicy"/> used to convert property names to SQL table names and/or column names (<see langword="null"/> for no conversion).
+    /// Gets or sets the <see cref="JsonNamingPolicy"/> used to convert property names to SQL table names and/or column names (<see langword="null"/> for no conversion).
     /// </summary>
     /// <remarks>
     /// For example, a naming policy like <see cref="JsonNamingPolicy.SnakeCaseLower"/> will build a query like this:
@@ -27,71 +27,99 @@ public class DapperStoreOptions
     public JsonNamingPolicy? TableNamingPolicy { get; set; }
 
 
+    /// <summary>
+    /// Gets or sets the SQL table and column names used for the users table extending <see cref="IdentityUser{TKey}"/>.
+    /// </summary>
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUser{TKey}"/> properties and a table name "Users".
     /// </remarks>
-    /// <inheritdoc cref="DapperUserStoreBase{TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim}.UserNames"/>
     public UserTableNames UserNames { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SQL table and column names used for the user logins table extending <see cref="IdentityUserLogin{TKey}"/>.
+    /// </summary>
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUserLogin{TKey}"/> properties and a table name "UserLogins".
     /// </remarks>
-    /// <inheritdoc cref="DapperUserStoreBase{TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim}.UserLoginNames"/>
     public UserLoginTableNames UserLoginNames { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SQL table and column names used for the user claims table extending <see cref="IdentityUserClaim{TKey}"/>.
+    /// </summary>
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUserClaim{TKey}"/> properties and a table name "UserClaims".
     /// </remarks>
-    /// <inheritdoc cref="DapperUserStoreBase{TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim}.UserClaimNames"/>
     public UserClaimTableNames UserClaimNames { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SQL table and column names used for the user tokens table extending <see cref="IdentityUserToken{TKey}"/>.
+    /// </summary>
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUserToken{TKey}"/> properties and a table name "UserTokens".
     /// </remarks>
-    /// <inheritdoc cref="DapperUserStoreBase{TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim}.UserTokenNames"/>
     public UserTokenTableNames UserTokenNames { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SQL table and column names used for the user roles table extending <see cref="IdentityUserRole{TKey}"/>.
+    /// </summary>
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityUserRole{TKey}"/> properties and a table name "UserRoles".
     /// </remarks>
-    /// <inheritdoc cref="DapperUserStoreBase{TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim}.UserRoleNames"/>
     public UserRoleTableNames UserRoleNames { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SQL table and column names used for the roles table extending <see cref="IdentityRole{TKey}"/>.
+    /// </summary>
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityRole{TKey}"/> properties and a table name "Roles".
     /// </remarks>
-    /// <inheritdoc cref="DapperRoleStoreBase{TRole, TKey, TUserRole, TRoleClaim}.RoleNames"/>
     public RoleTableNames RoleNames { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SQL table and column names used for the role claims table extending <see cref="IdentityRoleClaim{TKey}"/>.
+    /// </summary>
     /// <remarks>
     /// The default names are generated using the <see cref="TableNamingPolicy"/> for <see cref="IdentityRoleClaim{TKey}"/> properties and a table name "RoleClaims".
     /// </remarks>
-    /// <inheritdoc cref="DapperRoleStoreBase{TRole, TKey, TUserRole, TRoleClaim}.RoleClaimNames"/>
-    public RoleClaimTableNames RoleClaimNames { get; }
+    public RoleClaimTableNames RoleClaimNames { get; set; }
 
 
     /// <summary>
-    /// Gets an array of the extra property names within the specified user type used for insert queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
+    /// Gets or sets an array of the extra property names within the specified user type used for insert queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
     /// </summary>
     public string[] ExtraUserInsertProperties { get; set; }
 
     /// <summary>
-    /// Gets an array of the extra property names within the specified user type used for update queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
+    /// Gets or sets an array of the extra property names within the specified user type used for update queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
     /// </summary>
     public string[] ExtraUserUpdateProperties { get; set; }
 
     /// <summary>
-    /// Gets an array of the extra property names within the specified role type used for insert queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
+    /// Gets or sets an array of the extra property names within the specified role type used for insert queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
     /// </summary>
     public string[] ExtraRoleInsertProperties { get; set; }
 
     /// <summary>
-    /// Gets an array of the extra property names within the specified role type used for update queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
+    /// Gets or sets an array of the extra property names within the specified role type used for update queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
     /// </summary>
     public string[] ExtraRoleUpdateProperties { get; set; }
 
 
-    /// <inheritdoc cref="DapperUserStoreBase{TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim}.GetBaseUserSqlCondition(string)"/>
+    /// <summary>
+    /// Gets or sets the base SQL condition delegate used for all user queries. Defaults to return "TRUE" (no base condition).
+    /// </summary>
+    /// <remarks>
+    /// This base condition is helpful to limit the set of users affected by SELECT, INSERT, UPDATE, and DELETE queries. 
+    /// For example:
+    /// <code>
+    /// BaseUserSqlConditionGetter = tableAlias =>
+    /// {
+    ///     var tablePrefix = string.IsNullOrEmpty(tableAlias) ? string.Empty : $"{tableAlias}.";
+    ///     
+    ///     return $"{tablePrefix}{nameof(User.TenantId).ToSqlColumn(TableNamingPolicy)} = @{nameof(User.TenantId)}";
+    /// }
+    /// </code>
+    /// </remarks>
     public SqlStatementDelegate BaseUserSqlConditionGetter { get; set; }
 
 

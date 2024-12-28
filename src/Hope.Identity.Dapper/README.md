@@ -40,7 +40,7 @@ builder.Services.AddIdentityCore<CustomUser>()
     {
         options.TableSchema = "identity";
         options.TableNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
-        options.UserNames.Table = "app_users";
+        options.UserNames.Table = "custom_users";
 
         options.ExtraUserInsertProperties = [
             nameof(CustomUser.CreatedOn), nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
@@ -61,16 +61,31 @@ public class CustomUser : IdentityUser<Guid>
 }
 ```
 
-### DapperUserStoreBase
-
-The `DapperUserStoreBase` class provides a base implementation for a Dapper-based Identity user store. Below is an example of how to use it.
+#### Using Custom Implementation
 
 ```c#
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentity<CustomUser, IdentityRole<Guid>>()
-    .AddUserStore<CustomUserStore>();
-    .AddRoleStore<DapperRoleStore<IdentityRole<Guid>, Guid>>();
+    .AddDapperStores<CustomUserStore, DapperRoleStore<IdentityRole<Guid>, Guid>>(options =>
+    {
+        options.TableSchema = "identity";
+        options.TableNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+        options.UserNames.Table = "custom_users";
+
+        options.BaseUserSqlConditionGetter = tableAlias => 
+        {
+            var tablePrefix = string.IsNullOrEmpty(tableAlias) ? string.Empty : $"{tableAlias}.";
+
+            return $"{tablePrefix}is_deleted = FALSE";
+        };
+
+        options.ExtraUserInsertProperties = [
+            nameof(CustomUser.CreatedOn), nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
+
+        options.ExtraUserUpdateProperties = [
+            nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
+    });
 
 var app = builder.Build();
 
@@ -81,32 +96,37 @@ public class CustomUser : IdentityUser<Guid>
     public DateTime CreatedOn { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+    public bool IsDeleted { get; set; }
 }
 
-public class CustomUserStore : DapperUserStoreBase<CustomUser, IdentityRole<Guid>, Guid>
+public class CustomUserStore : DapperUserStore<CustomUser, IdentityRole<Guid>, Guid>
 {
-    protected override JsonNamingPolicy? TableNamingPolicy { get; } = JsonNamingPolicy.SnakeCaseLower;
-
-    public CustomUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer)
-        : base(dbDataSource, describer) { }
+    public CustomUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+        : base(dbDataSource, options, describer) { }
 
 
-    protected override string[] GetUserInsertProperties(string[] identityUserInsertProperties)
+    public override async Task<IdentityResult> DeleteAsync(AppUser user, CancellationToken cancellationToken = default)
     {
-        return [.. identityUserInsertProperties, nameof(CustomUser.CreatedOn), nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
-    }
+        await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
-    protected override string[] GetUserUpdateProperties(string[] identityUserUpdateProperties)
-    {
-        return [.. identityUserUpdateProperties, nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
+        var isDeletedColumn = nameof(CustomUser.IsDeleted).ToSqlColumn(Options.TableNamingPolicy);
+
+        await connection.ExecuteAsync(
+            $"""
+            UPDATE {Options.UserNames.Table} SET {isDeletedColumn} = TRUE 
+            WHERE {isDeletedColumn} = FALSE AND {Options.UserNames.Id} = @userId
+            """,
+            new { userId = user.Id });
+
+        return IdentityResult.Success;
     }
 }
 ```
 
 
-### DapperRoleStore and DapperRoleStoreBase
+### DapperRoleStore
 
-The package also provides `DapperRoleStore` and `DapperRoleStoreBase` classes for managing roles following the same concept for user stores.
+The package also provides `DapperRoleStore` class for managing roles following the same concept as the user store.
 
 
 ## Documentation

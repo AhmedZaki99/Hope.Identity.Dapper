@@ -11,15 +11,15 @@ public abstract class DapperRoleStore
     : DapperRoleStore<IdentityRole<string>>
 {
     /// <inheritdoc/>
-    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
-        : base(dbDataSource, describer, options) { }
+    public DapperRoleStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+        : base(dbDataSource, options, describer) { }
 
 
     /// <inheritdoc/>
-    protected override string[] GetRoleInsertProperties(string[] identityUserInsertProperties) => identityUserInsertProperties;
+    protected override string[] GetRoleInsertProperties() => IdentityRoleInsertProperties;
 
     /// <inheritdoc/>
-    protected override string[] GetRoleUpdateProperties(string[] identityUserUpdateProperties) => identityUserUpdateProperties;
+    protected override string[] GetRoleUpdateProperties() => IdentityRoleUpdateProperties;
 }
 
 /// <summary>
@@ -31,8 +31,8 @@ public class DapperRoleStore<TRole>
     where TRole : IdentityRole<string>
 {
     /// <inheritdoc/>
-    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
-        : base(dbDataSource, describer, options) { }
+    public DapperRoleStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+        : base(dbDataSource, options, describer) { }
 }
 
 /// <summary>
@@ -45,6 +45,6 @@ public class DapperRoleStore<TRole, TKey>
     where TKey : IEquatable<TKey>
 {
     /// <inheritdoc/>
-    public DapperRoleStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
-        : base(dbDataSource, describer, options) { }
+    public DapperRoleStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer) 
+        : base(dbDataSource, options, describer) { }
 }

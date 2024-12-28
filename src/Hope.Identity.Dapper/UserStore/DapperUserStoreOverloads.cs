@@ -11,15 +11,15 @@ public class DapperUserStore
     : DapperUserStore<IdentityUser<string>>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
-        : base(dbDataSource, describer, options) { }
+    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+        : base(dbDataSource, options, describer) { }
 
 
     /// <inheritdoc/>
-    protected override string[] GetUserInsertProperties(string[] identityUserInsertProperties) => identityUserInsertProperties;
+    protected override string[] GetUserInsertProperties() => IdentityUserInsertProperties;
 
     /// <inheritdoc/>
-    protected override string[] GetUserUpdateProperties(string[] identityUserUpdateProperties) => identityUserUpdateProperties;
+    protected override string[] GetUserUpdateProperties() => IdentityUserUpdateProperties;
 }
 
 /// <inheritdoc/>
@@ -28,8 +28,8 @@ public class DapperUserStore<TUser>
     where TUser : IdentityUser<string>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
-        : base(dbDataSource, describer, options) { }
+    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+        : base(dbDataSource, options, describer) { }
 }
 
 /// <summary>
@@ -42,8 +42,8 @@ public class DapperUserStore<TUser, TRole>
     where TRole : IdentityRole<string>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
-        : base(dbDataSource, describer, options) { }
+    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+        : base(dbDataSource, options, describer) { }
 }
 
 /// <summary>
@@ -57,6 +57,6 @@ public class DapperUserStore<TUser, TRole, TKey>
     where TKey : IEquatable<TKey>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IdentityErrorDescriber? describer, IOptions<DapperStoreOptions> options) 
-        : base(dbDataSource, describer, options) { }
+    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer) 
+        : base(dbDataSource, options, describer) { }
 }
