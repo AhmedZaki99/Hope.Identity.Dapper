@@ -1,14 +1,10 @@
-﻿using System.Text.Json;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Hope.Identity.Dapper;
 
 /// <summary>
 /// Represents the table and column names for the user claim table.
 /// </summary>
-/// <remarks>
-/// The default pre-conversion table name is "UserClaims", which is then converted using the provided <see cref="JsonNamingPolicy"/>.
-/// </remarks>
 public class UserClaimTableNames : TableNames
 {
     /// <summary>
@@ -16,28 +12,39 @@ public class UserClaimTableNames : TableNames
     /// </summary>
     public const string DefaultPascalCaseTable = "UserClaims";
 
-
-    /// <summary>
-    /// Gets the column name for the <see cref="IdentityUserClaim{TKey}.UserId"/> property.
-    /// </summary>
-    public string UserId { get; set; }
-
-    /// <summary>
-    /// Gets the column name for the <see cref="IdentityUserClaim{TKey}.ClaimType"/> property.
-    /// </summary>
-    public string ClaimType { get; set; }
-
-    /// <summary>
-    /// Gets the column name for the <see cref="IdentityUserClaim{TKey}.ClaimValue"/> property.
-    /// </summary>
-    public string ClaimValue { get; set; }
-
-
-    internal UserClaimTableNames(JsonNamingPolicy? namingPolicy = null, string? table = null) 
-        : base(table ?? namingPolicy.TryConvertName(DefaultPascalCaseTable), namingPolicy)
+    private static readonly UserClaimTableNames Default = new()
     {
-        UserId = nameof(IdentityUserClaim<string>.UserId).ToSqlColumn(namingPolicy);
-        ClaimType = nameof(IdentityUserClaim<string>.ClaimType).ToSqlColumn(namingPolicy);
-        ClaimValue = nameof(IdentityUserClaim<string>.ClaimValue).ToSqlColumn(namingPolicy);
+        Table = DefaultPascalCaseTable,
+        UserId = nameof(IdentityUserClaim<string>.UserId),
+        ClaimType = nameof(IdentityUserClaim<string>.ClaimType),
+        ClaimValue = nameof(IdentityUserClaim<string>.ClaimValue)
+    };
+
+    /// <inheritdoc/>
+    protected override TableNames GetDefault() => Default;
+
+
+    /// <summary>
+    /// Gets or sets the column name for the <see cref="IdentityUserClaim{TKey}.UserId"/> property.
+    /// </summary>
+    public string UserId { get; set; } = Default.UserId;
+
+    /// <summary>
+    /// Gets or sets the column name for the <see cref="IdentityUserClaim{TKey}.ClaimType"/> property.
+    /// </summary>
+    public string ClaimType { get; set; } = Default.ClaimType;
+
+    /// <summary>
+    /// Gets or sets the column name for the <see cref="IdentityUserClaim{TKey}.ClaimValue"/> property.
+    /// </summary>
+    public string ClaimValue { get; set; } = Default.ClaimValue;
+
+
+    /// <inheritdoc/>
+    internal override void ApplyNamingConversionToDefaults(Func<string, string> convertFunction)
+    {
+        UserId = ConvertIfDefault(UserId, Default.UserId, convertFunction);
+        ClaimType = ConvertIfDefault(ClaimType, Default.ClaimType, convertFunction);
+        ClaimValue = ConvertIfDefault(ClaimValue, Default.ClaimValue, convertFunction);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Hope.Identity.Dapper;
 
@@ -8,19 +8,42 @@ namespace Hope.Identity.Dapper;
 public abstract class TableNames
 {
     /// <summary>
-    /// The name of the table.
+    /// Gets or sets the name of the table.
     /// </summary>
-    public string Table { get; set; }
+    [field: MaybeNull]
+    public string Table 
+    { 
+        get => field ??= GetDefault().Table; 
+        set; 
+    } 
+
 
     /// <summary>
-    /// The naming policy to use for converting the underlying property names to default column names.
+    /// Gets the default table instance.
     /// </summary>
-    protected internal JsonNamingPolicy? NamingPolicy { get; }
+    /// <returns>The default table instance.</returns>
+    protected abstract TableNames GetDefault();
+
+    /// <summary>
+    /// Applies a naming conversion to the default table and column names.
+    /// </summary>
+    /// <param name="convertFunction">The function to apply to the names.</param>
+    internal abstract void ApplyNamingConversionToDefaults(Func<string, string> convertFunction);
 
 
-    internal TableNames(string table, JsonNamingPolicy? namingPolicy = null)
+    /// <summary>
+    /// Converts the given name using a convert function if it's set to the given default name.
+    /// </summary>
+    /// <param name="name">The name to convert.</param>
+    /// <param name="defaultName">The default name to compare against.</param>
+    /// <param name="convertFunction">The function to apply to the default name.</param>
+    /// <returns>The converted name if it was the default name, otherwise the original name.</returns>
+    protected static string ConvertIfDefault(string name, string defaultName, Func<string, string> convertFunction)
     {
-        Table = table;
-        NamingPolicy = namingPolicy;
+        if (name == defaultName)
+        {
+            return convertFunction(name);
+        }
+        return name;
     }
 }

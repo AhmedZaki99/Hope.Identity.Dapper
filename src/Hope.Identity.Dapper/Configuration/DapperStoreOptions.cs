@@ -8,7 +8,6 @@ namespace Hope.Identity.Dapper;
 /// </summary>
 public class DapperStoreOptions
 {
-
     /// <summary>
     /// Gets or sets the database schema to use for the identity tables.
     /// </summary>
@@ -24,7 +23,27 @@ public class DapperStoreOptions
     /// VALUES (@Id, @UserName, @NormalizedUserName, @Email, @NormalizedEmail, ...)
     /// </code>
     /// </remarks>
-    public JsonNamingPolicy? TableNamingPolicy { get; set; }
+    public JsonNamingPolicy? TableNamingPolicy 
+    {
+        get;
+        set 
+        {
+            if (field is not null)
+            {
+                throw new InvalidOperationException("The naming policy cannot be changed after it has been set.");
+            }
+            if (value is null)
+            {
+                return;
+            }
+            field = value;
+
+            foreach (var tableNames in EnumerateTables())
+            {
+                tableNames.ApplyNamingConversionToDefaults(value.ConvertName);
+            }
+        }
+    }
 
 
     /// <summary>
@@ -110,13 +129,13 @@ public class DapperStoreOptions
     /// </summary>
     public DapperStoreOptions()
     {
-        UserNames = new(TableNamingPolicy);
-        UserLoginNames = new(TableNamingPolicy);
-        UserClaimNames = new(TableNamingPolicy);
-        UserTokenNames = new(TableNamingPolicy);
-        UserRoleNames = new(TableNamingPolicy);
-        RoleNames = new(TableNamingPolicy);
-        RoleClaimNames = new(TableNamingPolicy);
+        UserNames = new();
+        UserLoginNames = new();
+        UserClaimNames = new();
+        UserTokenNames = new();
+        UserRoleNames = new();
+        RoleNames = new();
+        RoleClaimNames = new();
 
         ExtraUserInsertProperties = [];
         ExtraUserUpdateProperties = [];
@@ -124,4 +143,19 @@ public class DapperStoreOptions
         ExtraRoleUpdateProperties = [];
     }
 
+
+    /// <summary>
+    /// Enumerates all the table names used by the identity stores
+    /// </summary>
+    /// <returns>An enumerable of all the table names used by the identity stores</returns>
+    public IEnumerable<TableNames> EnumerateTables()
+    {
+        yield return UserNames;
+        yield return UserLoginNames;
+        yield return UserClaimNames;
+        yield return UserTokenNames;
+        yield return UserRoleNames;
+        yield return RoleNames;
+        yield return RoleClaimNames;
+    }
 }
