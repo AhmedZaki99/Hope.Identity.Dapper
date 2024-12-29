@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Hope.Identity.Dapper;
+﻿namespace Hope.Identity.Dapper;
 
 /// <summary>
 /// Represents the table and column names for a specific table.
@@ -10,19 +8,17 @@ public abstract class TableNames
     /// <summary>
     /// Gets or sets the name of the table.
     /// </summary>
-    [field: MaybeNull]
-    public string Table 
-    { 
-        get => field ??= GetDefault().Table; 
-        set; 
-    } 
-
+    public string Table { get; set; }
 
     /// <summary>
-    /// Gets the default table instance.
+    /// Initializes a new instance of the <see cref="TableNames"/> class.
     /// </summary>
-    /// <returns>The default table instance.</returns>
-    protected abstract TableNames GetDefault();
+    /// <param name="table">The name of the table.</param>
+    protected TableNames(string table)
+    {
+        Table = table;
+    }
+
 
     /// <summary>
     /// Applies a naming conversion to the default table and column names.

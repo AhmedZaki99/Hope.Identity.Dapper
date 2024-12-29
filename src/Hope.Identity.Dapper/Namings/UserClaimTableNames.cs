@@ -12,37 +12,35 @@ public class UserClaimTableNames : TableNames
     /// </summary>
     public const string DefaultPascalCaseTable = "UserClaims";
 
-    private static readonly UserClaimTableNames Default = new()
-    {
-        Table = DefaultPascalCaseTable,
-        UserId = nameof(IdentityUserClaim<string>.UserId),
-        ClaimType = nameof(IdentityUserClaim<string>.ClaimType),
-        ClaimValue = nameof(IdentityUserClaim<string>.ClaimValue)
-    };
-
-    /// <inheritdoc/>
-    protected override TableNames GetDefault() => Default;
+    private static readonly UserClaimTableNames Default = new();
 
 
     /// <summary>
     /// Gets or sets the column name for the <see cref="IdentityUserClaim{TKey}.UserId"/> property.
     /// </summary>
-    public string UserId { get; set; } = Default.UserId;
+    public string UserId { get; set; } = nameof(IdentityUserClaim<string>.UserId);
 
     /// <summary>
     /// Gets or sets the column name for the <see cref="IdentityUserClaim{TKey}.ClaimType"/> property.
     /// </summary>
-    public string ClaimType { get; set; } = Default.ClaimType;
+    public string ClaimType { get; set; } = nameof(IdentityUserClaim<string>.ClaimType);
 
     /// <summary>
     /// Gets or sets the column name for the <see cref="IdentityUserClaim{TKey}.ClaimValue"/> property.
     /// </summary>
-    public string ClaimValue { get; set; } = Default.ClaimValue;
+    public string ClaimValue { get; set; } = nameof(IdentityUserClaim<string>.ClaimValue);
+
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserClaimTableNames"/> class.
+    /// </summary>
+    public UserClaimTableNames() : base(DefaultPascalCaseTable) { }
 
 
     /// <inheritdoc/>
     internal override void ApplyNamingConversionToDefaults(Func<string, string> convertFunction)
     {
+        Table = ConvertIfDefault(Table, Default.Table, convertFunction);
         UserId = ConvertIfDefault(UserId, Default.UserId, convertFunction);
         ClaimType = ConvertIfDefault(ClaimType, Default.ClaimType, convertFunction);
         ClaimValue = ConvertIfDefault(ClaimValue, Default.ClaimValue, convertFunction);

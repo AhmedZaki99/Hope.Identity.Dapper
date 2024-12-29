@@ -12,37 +12,35 @@ public class RoleTableNames : TableNames
     /// </summary>
     public const string DefaultPascalCaseTable = "Roles";
 
-    private static readonly RoleTableNames Default = new()
-    {
-        Table = DefaultPascalCaseTable,
-        Id = nameof(IdentityRole.Id),
-        Name = nameof(IdentityRole.Name),
-        NormalizedName = nameof(IdentityRole.NormalizedName)
-    };
-
-    /// <inheritdoc/>
-    protected override TableNames GetDefault() => Default;
+    private static readonly RoleTableNames Default = new();
 
 
     /// <summary>
     /// Gets or sets the column name for the <see cref="IdentityRole{TKey}.Id"/> property.
     /// </summary>
-    public string Id { get; set; } = Default.Id;
+    public string Id { get; set; } = nameof(IdentityRole.Id);
 
     /// <summary>
     /// Gets or sets the column name for the <see cref="IdentityRole{TKey}.Name"/> property.
     /// </summary>
-    public string Name { get; set; } = Default.Name;
+    public string Name { get; set; } = nameof(IdentityRole.Name);
 
     /// <summary>
     /// Gets or sets the column name for the <see cref="IdentityRole{TKey}.NormalizedName"/> property.
     /// </summary>
-    public string NormalizedName { get; set; } = Default.NormalizedName;
+    public string NormalizedName { get; set; } = nameof(IdentityRole.NormalizedName);
+
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RoleTableNames"/> class.
+    /// </summary>
+    public RoleTableNames() : base(DefaultPascalCaseTable) { }
 
 
     /// <inheritdoc/>
     internal override void ApplyNamingConversionToDefaults(Func<string, string> convertFunction)
     {
+        Table = ConvertIfDefault(Table, Default.Table, convertFunction);
         Id = ConvertIfDefault(Id, Default.Id, convertFunction);
         Name = ConvertIfDefault(Name, Default.Name, convertFunction);
         NormalizedName = ConvertIfDefault(NormalizedName, Default.NormalizedName, convertFunction);
