@@ -1,0 +1,43 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{578878BB-CE4C-4566-ADD2-C6F4E4D67F7B}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\deploy.yml = .github\workflows\deploy.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FF6B9E81-B0D2-42EE-9585-0195592B9D2F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{710C6D52-36C8-449D-BDEA-5BD1B1D767AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hope.Identity.Dapper", "src\Hope.Identity.Dapper\Hope.Identity.Dapper.csproj", "{537E8D49-D100-48D0-8A47-DBB71D15BDFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hope.Identity.Dapper.Tests", "tests\Hope.Identity.Dapper.Tests\Hope.Identity.Dapper.Tests.csproj", "{37E8B6EC-0DA5-4872-AB5C-4D12D52CB3FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{537E8D49-D100-48D0-8A47-DBB71D15BDFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{537E8D49-D100-48D0-8A47-DBB71D15BDFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{537E8D49-D100-48D0-8A47-DBB71D15BDFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{537E8D49-D100-48D0-8A47-DBB71D15BDFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37E8B6EC-0DA5-4872-AB5C-4D12D52CB3FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37E8B6EC-0DA5-4872-AB5C-4D12D52CB3FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37E8B6EC-0DA5-4872-AB5C-4D12D52CB3FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37E8B6EC-0DA5-4872-AB5C-4D12D52CB3FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{537E8D49-D100-48D0-8A47-DBB71D15BDFB} = {FF6B9E81-B0D2-42EE-9585-0195592B9D2F}
+		{37E8B6EC-0DA5-4872-AB5C-4D12D52CB3FE} = {710C6D52-36C8-449D-BDEA-5BD1B1D767AF}
+	EndGlobalSection
+EndGlobal

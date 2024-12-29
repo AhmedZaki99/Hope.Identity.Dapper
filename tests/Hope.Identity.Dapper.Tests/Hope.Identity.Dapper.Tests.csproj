@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Hope.Configuration.Extensions\Hope.Configuration.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\Hope.Identity.Dapper\Hope.Identity.Dapper.csproj" />
   </ItemGroup>
 
   <ItemGroup>

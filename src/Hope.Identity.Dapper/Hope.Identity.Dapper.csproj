@@ -3,10 +3,10 @@
   <PropertyGroup>
 	<PackageId>Hope.Identity.Dapper</PackageId>
 	<PackageTags>netcore;aspnetcore;identity;dapper;sql;stores</PackageTags>
-	<PackageReleaseNotes>https://github.com/AhmedZaki99/Hope.Public.NuGet/releases</PackageReleaseNotes>
-	<PackageProjectUrl>https://github.com/AhmedZaki99/Hope.Public.NuGet</PackageProjectUrl>
+	<PackageReleaseNotes>https://github.com/AhmedZaki99/Hope.Identity.Dapper/releases</PackageReleaseNotes>
+	<PackageProjectUrl>https://github.com/AhmedZaki99/Hope.Identity.Dapper</PackageProjectUrl>
 	<RepositoryType>git</RepositoryType>
-	<RepositoryUrl>https://github.com/AhmedZaki99/Hope.Public.NuGet</RepositoryUrl>
+	<RepositoryUrl>https://github.com/AhmedZaki99/Hope.Identity.Dapper</RepositoryUrl>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 
 	<Title>$(PackageId)</Title>
@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<None Include="README.md" Pack="true" PackagePath="\" />
+	<None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 
