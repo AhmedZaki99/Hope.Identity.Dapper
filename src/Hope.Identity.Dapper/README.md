@@ -97,7 +97,7 @@ public class CustomUserStore : DapperUserStore<CustomUser, IdentityRole<Guid>, G
     private readonly string _tabelPrefix;
     private readonly string _isDeletedColumn;
 
-    public CustomUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+    public CustomUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null)
         : base(dbDataSource, options, describer) 
     { 
         _tabelPrefix = Options.TableSchema is null ? string.Empty : $"{Options.TableSchema}.";

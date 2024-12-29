@@ -67,7 +67,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     /// <param name="dbDataSource">The <see cref="System.Data.Common.DbDataSource"/> used to create database connections.</param>
     /// <param name="options">The options used to configure the store.</param>
     /// <param name="describer">The <see cref="IdentityErrorDescriber"/> used to describe store errors.</param>
-    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer) 
+    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null) 
         : base(describer ?? new())
     {
         DbDataSource = dbDataSource;

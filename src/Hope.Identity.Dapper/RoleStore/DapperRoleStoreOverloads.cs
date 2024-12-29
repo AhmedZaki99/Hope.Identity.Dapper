@@ -11,7 +11,7 @@ public abstract class DapperRoleStore
     : DapperRoleStore<IdentityRole<string>>
 {
     /// <inheritdoc/>
-    public DapperRoleStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+    public DapperRoleStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null)
         : base(dbDataSource, options, describer) { }
 
 
@@ -31,7 +31,7 @@ public class DapperRoleStore<TRole>
     where TRole : IdentityRole<string>
 {
     /// <inheritdoc/>
-    public DapperRoleStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+    public DapperRoleStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null)
         : base(dbDataSource, options, describer) { }
 }
 
@@ -45,6 +45,6 @@ public class DapperRoleStore<TRole, TKey>
     where TKey : IEquatable<TKey>
 {
     /// <inheritdoc/>
-    public DapperRoleStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer) 
+    public DapperRoleStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null) 
         : base(dbDataSource, options, describer) { }
 }

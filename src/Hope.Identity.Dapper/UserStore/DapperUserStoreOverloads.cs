@@ -11,7 +11,7 @@ public class DapperUserStore
     : DapperUserStore<IdentityUser<string>>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null)
         : base(dbDataSource, options, describer) { }
 
 
@@ -28,7 +28,7 @@ public class DapperUserStore<TUser>
     where TUser : IdentityUser<string>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null)
         : base(dbDataSource, options, describer) { }
 }
 
@@ -42,7 +42,7 @@ public class DapperUserStore<TUser, TRole>
     where TRole : IdentityRole<string>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer)
+    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null)
         : base(dbDataSource, options, describer) { }
 }
 
@@ -57,6 +57,6 @@ public class DapperUserStore<TUser, TRole, TKey>
     where TKey : IEquatable<TKey>
 {
     /// <inheritdoc/>
-    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer) 
+    public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null) 
         : base(dbDataSource, options, describer) { }
 }
