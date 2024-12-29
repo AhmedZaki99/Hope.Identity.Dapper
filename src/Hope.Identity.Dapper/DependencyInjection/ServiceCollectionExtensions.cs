@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
         var dapperUserStoreType = typeof(TUserStore).FindGenericBaseType(typeof(DapperUserStore<,,,,,,,>))
             ?? throw new ArgumentException("The user store type provided must inherit from DapperUserStore or one of its generic overloads", nameof(TUserStore));
 
-        var dapperRoleStoreType = typeof(TUserStore).FindGenericBaseType(typeof(DapperRoleStore<,,,>))
+        var dapperRoleStoreType = typeof(TRoleStore).FindGenericBaseType(typeof(DapperRoleStore<,,,>))
             ?? throw new ArgumentException("The role store type provided must inherit from DapperRoleStore or one of its generic overloads", nameof(TRoleStore));
 
         var userType = dapperUserStoreType.GenericTypeArguments[0];

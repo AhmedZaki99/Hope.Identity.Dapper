@@ -124,7 +124,7 @@ public class CustomUserStore : DapperUserStore<CustomUser, IdentityRole<Guid>, G
             WHERE {GetBaseUserSqlCondition(dynamicParams)} 
             AND {Options.UserNames.Id} = @userId
             """,
-            new { userId = user.Id });
+            dynamicParams);
 
         return IdentityResult.Success;
     }
