@@ -8,7 +8,7 @@ namespace Hope.Identity.Dapper;
 /// Provides an implementation for a Dapper-based Identity user store using the default Identity models, mainly <see cref="IdentityUser"/>, and <see cref="string"/> keys.
 /// </summary>
 public class DapperUserStore
-    : DapperUserStore<IdentityUser<string>>
+    : DapperUserStore<IdentityUser>
 {
     /// <inheritdoc/>
     public DapperUserStore(DbDataSource dbDataSource, IOptions<DapperStoreOptions> options, IdentityErrorDescriber? describer = null)
@@ -24,7 +24,7 @@ public class DapperUserStore
 
 /// <inheritdoc/>
 public class DapperUserStore<TUser>
-    : DapperUserStore<TUser, IdentityRole<string>>
+    : DapperUserStore<TUser, IdentityRole>
     where TUser : IdentityUser<string>
 {
     /// <inheritdoc/>

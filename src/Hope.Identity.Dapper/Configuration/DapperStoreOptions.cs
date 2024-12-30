@@ -28,19 +28,19 @@ public class DapperStoreOptions
         get;
         set 
         {
+            if (value == field)
+            {
+                return;
+            }
             if (field is not null)
             {
                 throw new InvalidOperationException("The naming policy cannot be changed after it has been set.");
-            }
-            if (value is null)
-            {
-                return;
             }
             field = value;
 
             foreach (var tableNames in EnumerateTables())
             {
-                tableNames.ApplyNamingConversionToDefaults(value.ConvertName);
+                tableNames.ApplyNamingConversionToDefaults(value!.ConvertName);
             }
         }
     }
