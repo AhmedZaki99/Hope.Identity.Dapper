@@ -37,14 +37,16 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     #region Protected Properties
 
     /// <summary>
-    /// Gets an array of the base <see cref="IdentityUser{TKey}"/> property names used for insert queries.
+    /// Gets a dictionary of base properties used for insert queries, 
+    /// where keys are the base <see cref="IdentityUser{TKey}"/> property names and values are the corresponding column names.
     /// </summary>
-    protected virtual string[] IdentityUserInsertProperties { get; }
+    protected virtual Dictionary<string, string> IdentityUserInsertProperties { get; }
 
     /// <summary>
-    /// Gets an array of the base <see cref="IdentityUser{TKey}"/> property names used for update queries.
+    /// Gets a dictionary of base properties used for update queries, 
+    /// where keys are the base <see cref="IdentityUser{TKey}"/> property names and values are the corresponding column names.
     /// </summary>
-    protected virtual string[] IdentityUserUpdateProperties { get; }
+    protected virtual Dictionary<string, string> IdentityUserUpdateProperties { get; }
 
     #endregion
 
@@ -73,23 +75,25 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
         DbDataSource = dbDataSource;
         Options = options?.Value ?? new();
 
-        IdentityUserUpdateProperties = [
-            nameof(IdentityUser<TKey>.UserName),
-            nameof(IdentityUser<TKey>.NormalizedUserName),
-            nameof(IdentityUser<TKey>.Email),
-            nameof(IdentityUser<TKey>.NormalizedEmail),
-            nameof(IdentityUser<TKey>.EmailConfirmed),
-            nameof(IdentityUser<TKey>.PasswordHash),
-            nameof(IdentityUser<TKey>.SecurityStamp),
-            nameof(IdentityUser<TKey>.ConcurrencyStamp),
-            nameof(IdentityUser<TKey>.PhoneNumber),
-            nameof(IdentityUser<TKey>.PhoneNumberConfirmed),
-            nameof(IdentityUser<TKey>.TwoFactorEnabled),
-            nameof(IdentityUser<TKey>.LockoutEnd),
-            nameof(IdentityUser<TKey>.LockoutEnabled),
-            nameof(IdentityUser<TKey>.AccessFailedCount)
-        ];
-        IdentityUserInsertProperties = [nameof(IdentityUser<TKey>.Id), .. IdentityUserUpdateProperties];
+        IdentityUserUpdateProperties = new() {
+            { nameof(IdentityUser<TKey>.UserName), Options.UserNames.UserName },
+            { nameof(IdentityUser<TKey>.NormalizedUserName), Options.UserNames.NormalizedUserName },
+            { nameof(IdentityUser<TKey>.Email), Options.UserNames.Email },
+            { nameof(IdentityUser<TKey>.NormalizedEmail), Options.UserNames.NormalizedEmail },
+            { nameof(IdentityUser<TKey>.EmailConfirmed), Options.UserNames.EmailConfirmed },
+            { nameof(IdentityUser<TKey>.PasswordHash), Options.UserNames.PasswordHash },
+            { nameof(IdentityUser<TKey>.SecurityStamp), Options.UserNames.SecurityStamp },
+            { nameof(IdentityUser<TKey>.ConcurrencyStamp), Options.UserNames.ConcurrencyStamp },
+            { nameof(IdentityUser<TKey>.PhoneNumber), Options.UserNames.PhoneNumber },
+            { nameof(IdentityUser<TKey>.PhoneNumberConfirmed), Options.UserNames.PhoneNumberConfirmed },
+            { nameof(IdentityUser<TKey>.TwoFactorEnabled), Options.UserNames.TwoFactorEnabled },
+            { nameof(IdentityUser<TKey>.LockoutEnd), Options.UserNames.LockoutEnd },
+            { nameof(IdentityUser<TKey>.LockoutEnabled), Options.UserNames.LockoutEnabled },
+            { nameof(IdentityUser<TKey>.AccessFailedCount), Options.UserNames.AccessFailedCount }
+        };
+        IdentityUserInsertProperties = new(IdentityUserUpdateProperties) {
+            { nameof(IdentityUser<TKey>.Id), Options.UserNames.Id }
+        };
     }
 
     #endregion
@@ -114,31 +118,39 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     }
 
     /// <summary>
-    /// Gets the full list of property names used to insert a new user.
+    /// Gets a dictionary of the full set of properties used to insert a new user, 
+    /// where keys represent the user type property names and values are the corresponding column names.
     /// </summary>
     /// <remarks>
-    /// The returned property names are expected to be the exact names before conversion, that are later converted using the <see cref="DapperStoreOptions.TableNamingPolicy"/>.
-    /// <br/>
-    /// Defaults to the sum of <see cref="IdentityUserInsertProperties"/> and <see cref="DapperStoreOptions.ExtraUserInsertProperties"/>
+    /// <para>Defaults to the sum of <see cref="IdentityUserInsertProperties"/> and <see cref="DapperStoreOptions.ExtraUserInsertProperties"/>.</para>
+    /// <para>Properties with <c>null</c> values in <see cref="DapperStoreOptions.ExtraUserInsertProperties"/> should be converted using <see cref="DapperStoreOptions.TableNamingPolicy"/>.</para>
     /// </remarks>
-    /// <returns>The full list of property names used to insert a new user.</returns>
-    protected virtual string[] GetUserInsertProperties()
+    /// <returns>A dictionary of the full set of properties used to insert a new user.</returns>
+    protected virtual Dictionary<string, string> GetUserInsertProperties()
     {
-        return [.. IdentityUserInsertProperties, .. Options.ExtraUserInsertProperties];
+        return Options.ExtraUserInsertProperties
+            .Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value ?? Options.TableNamingPolicy.TryConvertName(kvp.Key)))
+            .Concat(IdentityUserInsertProperties)
+            .DistinctBy(kvp => kvp.Key)
+            .ToDictionary();
     }
 
     /// <summary>
-    /// Gets the full list of property names used to update a user.
+    /// Gets a dictionary of the full set of properties used to update a user, 
+    /// where keys represent the user type property names and values are the corresponding column names.
     /// </summary>
     /// <remarks>
-    /// The returned property names are expected to be the exact names before conversion, that are later converted using the <see cref="DapperStoreOptions.TableNamingPolicy"/>.
-    /// <br/>
-    /// Defaults to the sum of <see cref="IdentityUserUpdateProperties"/> and <see cref="DapperStoreOptions.ExtraUserUpdateProperties"/>
+    /// <para>Defaults to the sum of <see cref="IdentityUserUpdateProperties"/> and <see cref="DapperStoreOptions.ExtraUserUpdateProperties"/>.</para>
+    /// <para>Properties with <c>null</c> values in <see cref="DapperStoreOptions.ExtraRoleUpdateProperties"/> should be converted using <see cref="DapperStoreOptions.TableNamingPolicy"/>.</para>
     /// </remarks>
-    /// <returns>The full list of property names used to update a user.</returns>
-    protected virtual string[] GetUserUpdateProperties()
+    /// <returns>A dictionary of the full set of properties used to update a user.</returns>
+    protected virtual Dictionary<string, string> GetUserUpdateProperties()
     {
-        return [.. IdentityUserUpdateProperties, .. Options.ExtraUserUpdateProperties];
+        return Options.ExtraUserUpdateProperties
+            .Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value ?? Options.TableNamingPolicy.TryConvertName(kvp.Key)))
+            .Concat(IdentityUserUpdateProperties)
+            .DistinctBy(kvp => kvp.Key)
+            .ToDictionary();
     }
 
     /// <summary>
@@ -244,18 +256,18 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
         {
             user.Id = GenerateNewKey() ?? user.Id; 
         }
-        var propertyNames = GetUserInsertProperties();
+        var propertyDictionary = GetUserInsertProperties();
 
         var insertCount = await connection.ExecuteAsync(
             $"""
-            INSERT INTO {TablePrefix}{Options.UserNames.Table} {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy, insertLines: true)}
-            VALUES {propertyNames.BuildSqlParametersBlock(insertLines: true)};
+            INSERT INTO {TablePrefix}{Options.UserNames.Table} {propertyDictionary.Values.BuildSqlColumnsBlock(insertLines: true)}
+            VALUES {propertyDictionary.Keys.BuildSqlParametersBlock(insertLines: true)};
             """,
             user);
 
         return insertCount > 0
             ? IdentityResult.Success
-            : IdentityResult.Failed(new IdentityError { Description = $"Could not insert user {user.Email}." });
+            : IdentityResult.Failed(new IdentityError { Description = $"Could not insert user {user.UserName}." });
     }
 
     /// <inheritdoc/>
@@ -263,14 +275,14 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     {
         await using var connection = await DbDataSource.OpenConnectionAsync(cancellationToken);
 
-        var propertyNames = GetUserUpdateProperties();
+        var propertyDictionary = GetUserUpdateProperties();
         var dynamicParams = new DynamicParameters(user);
 
         var updateCount = await connection.ExecuteAsync(
             $"""
             UPDATE {TablePrefix}{Options.UserNames.Table} 
-            SET {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy, insertLines: true)}
-            = {propertyNames.BuildSqlParametersBlock(insertLines: true)}
+            SET {propertyDictionary.Values.BuildSqlColumnsBlock(insertLines: true)}
+            = {propertyDictionary.Keys.BuildSqlParametersBlock(insertLines: true)}
             WHERE {GetBaseUserSqlCondition(dynamicParams)} 
             AND {Options.UserNames.Id} = @{nameof(user.Id)};
             """,
@@ -278,7 +290,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         return updateCount > 0
             ? IdentityResult.Success
-            : IdentityResult.Failed(new IdentityError { Description = $"Could not update user {user.Email}." });
+            : IdentityResult.Failed(new IdentityError { Description = $"Could not update user {user.UserName}." });
     }
 
     /// <inheritdoc/>
@@ -288,7 +300,7 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var dynamicParams = new DynamicParameters(new { userId = user.Id });
 
-        await connection.ExecuteAsync(
+        var deleteCount = await connection.ExecuteAsync(
             $"""
             DELETE FROM {TablePrefix}{Options.UserNames.Table}
             WHERE {GetBaseUserSqlCondition(dynamicParams)} 
@@ -296,7 +308,9 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
             """,
             dynamicParams);
 
-        return IdentityResult.Success;
+        return deleteCount > 0
+            ? IdentityResult.Success
+            : IdentityResult.Failed(new IdentityError { Description = $"User '{user.UserName}' not found." });
     }
 
     #endregion
@@ -489,18 +503,18 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
 
         var userLogin = CreateUserLogin(user, login);
 
-        string[] propertyNames = [
-            nameof(userLogin.UserId),
-            nameof(userLogin.LoginProvider),
-            nameof(userLogin.ProviderKey),
-            nameof(userLogin.ProviderDisplayName)
-        ];
+        var propertyDictionary = new Dictionary<string, string> {
+            { nameof(userLogin.UserId), Options.UserLoginNames.UserId },
+            { nameof(userLogin.LoginProvider), Options.UserLoginNames.LoginProvider },
+            { nameof(userLogin.ProviderKey), Options.UserLoginNames.ProviderKey },
+            { nameof(userLogin.ProviderDisplayName), Options.UserLoginNames.ProviderDisplayName }
+        };
 
         await connection.ExecuteAsync(
             $"""
             INSERT INTO {TablePrefix}{Options.UserLoginNames.Table} 
-            {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy)} 
-            VALUES {propertyNames.BuildSqlParametersBlock()}
+            {propertyDictionary.Values.BuildSqlColumnsBlock()} 
+            VALUES {propertyDictionary.Keys.BuildSqlParametersBlock()}
             """,
             userLogin);
     }
@@ -548,18 +562,18 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     {
         await using var connection = await DbDataSource.OpenConnectionAsync();
 
-        string[] propertyNames = [
-            nameof(token.UserId),
-            nameof(token.LoginProvider),
-            nameof(token.Name),
-            nameof(token.Value)
-        ];
+        var propertyDictionary = new Dictionary<string, string> {
+            { nameof(token.UserId), Options.UserTokenNames.UserId },
+            { nameof(token.LoginProvider), Options.UserTokenNames.LoginProvider },
+            { nameof(token.Name), Options.UserTokenNames.Name },
+            { nameof(token.Value), Options.UserTokenNames.Value }
+        };
 
         await connection.ExecuteAsync(
             $"""
             INSERT INTO {TablePrefix}{Options.UserTokenNames.Table} 
-            {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy)}
-            VALUES {propertyNames.BuildSqlParametersBlock()}
+            {propertyDictionary.Values.BuildSqlColumnsBlock()}
+            VALUES {propertyDictionary.Keys.BuildSqlParametersBlock()}
             """,
             token);
     }
@@ -568,18 +582,18 @@ public class DapperUserStore<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLog
     protected override async Task RemoveUserTokenAsync(TUserToken token)
     {
         await using var connection = await DbDataSource.OpenConnectionAsync();
-
-        string[] propertyNames = [
-            nameof(token.UserId),
-            nameof(token.LoginProvider),
-            nameof(token.Name)
-        ];
+        
+        var propertyDictionary = new Dictionary<string, string> {
+            { nameof(token.UserId), Options.UserTokenNames.UserId },
+            { nameof(token.LoginProvider), Options.UserTokenNames.LoginProvider },
+            { nameof(token.Name), Options.UserTokenNames.Name }
+        };
 
         await connection.ExecuteAsync(
             $"""
             DELETE FROM {TablePrefix}{Options.UserTokenNames.Table} 
-            WHERE {propertyNames.BuildSqlColumnsBlock(Options.TableNamingPolicy)} 
-            = {propertyNames.BuildSqlParametersBlock()}
+            WHERE {propertyDictionary.Values.BuildSqlColumnsBlock()} 
+            = {propertyDictionary.Keys.BuildSqlParametersBlock()}
             """,
             token);
     }

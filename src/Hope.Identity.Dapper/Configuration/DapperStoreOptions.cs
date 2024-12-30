@@ -104,24 +104,40 @@ public class DapperStoreOptions
 
 
     /// <summary>
-    /// Gets or sets an array of the extra property names within the specified user type used for insert queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
+    /// Gets or sets a dictionary of the extra properties within the specified user type used for insert queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
     /// </summary>
-    public string[] ExtraUserInsertProperties { get; set; }
+    /// <remarks>
+    /// <para>Keys represent the user type property names and values are the corresponding column names.</para>
+    /// <para>Set values to null to use the provided <see cref="TableNamingPolicy"/> for property name conversion.</para>
+    /// </remarks>
+    public Dictionary<string, string?> ExtraUserInsertProperties { get; set; }
 
     /// <summary>
-    /// Gets or sets an array of the extra property names within the specified user type used for update queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
+    /// Gets or sets a dictionary of the extra properties within the specified user type used for update queries (excluding the base <see cref="IdentityUser{TKey}"/> properties).
     /// </summary>
-    public string[] ExtraUserUpdateProperties { get; set; }
+    /// <remarks>
+    /// <para>Keys represent the user type property names and values are the corresponding column names.</para>
+    /// <para>Set values to null to use the provided <see cref="TableNamingPolicy"/> for property name conversion.</para>
+    /// </remarks>
+    public Dictionary<string, string?> ExtraUserUpdateProperties { get; set; }
 
     /// <summary>
-    /// Gets or sets an array of the extra property names within the specified role type used for insert queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
+    /// Gets or sets a dictionary of the extra properties within the specified role type used for insert queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
     /// </summary>
-    public string[] ExtraRoleInsertProperties { get; set; }
+    /// <remarks>
+    /// <para>Keys represent the role type property names and values are the corresponding column names.</para>
+    /// <para>Set values to null to use the provided <see cref="TableNamingPolicy"/> for property name conversion.</para>
+    /// </remarks>
+    public Dictionary<string, string?> ExtraRoleInsertProperties { get; set; }
 
     /// <summary>
-    /// Gets or sets an array of the extra property names within the specified role type used for update queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
+    /// Gets or sets a dictionary of the extra properties within the specified role type used for update queries (excluding the base <see cref="IdentityRole{TKey}"/> properties).
     /// </summary>
-    public string[] ExtraRoleUpdateProperties { get; set; }
+    /// <remarks>
+    /// <para>Keys represent the role type property names and values are the corresponding column names.</para>
+    /// <para>Set values to null to use the provided <see cref="TableNamingPolicy"/> for property name conversion.</para>
+    /// </remarks>
+    public Dictionary<string, string?> ExtraRoleUpdateProperties { get; set; }
 
 
     /// <summary>

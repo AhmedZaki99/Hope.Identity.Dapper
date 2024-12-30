@@ -30,6 +30,11 @@ public class RoleTableNames : TableNames
     /// </summary>
     public string NormalizedName { get; set; } = nameof(IdentityRole.NormalizedName);
 
+    /// <summary>
+    /// Gets or sets the column name for the <see cref="IdentityRole{TKey}.ConcurrencyStamp"/> property.
+    /// </summary>
+    public string ConcurrencyStamp { get; set; } = nameof(IdentityRole.ConcurrencyStamp);
+
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RoleTableNames"/> class.
@@ -44,5 +49,6 @@ public class RoleTableNames : TableNames
         Id = ConvertIfDefault(Id, Default.Id, convertFunction);
         Name = ConvertIfDefault(Name, Default.Name, convertFunction);
         NormalizedName = ConvertIfDefault(NormalizedName, Default.NormalizedName, convertFunction);
+        ConcurrencyStamp = ConvertIfDefault(ConcurrencyStamp, Default.ConcurrencyStamp, convertFunction);
     }
 }

@@ -7,7 +7,7 @@ namespace Hope.Identity.Dapper;
 /// <summary>
 /// Provides an implementation for a Dapper-based Identity role store using the default Identity models, mainly <see cref="IdentityRole"/>, and <see cref="string"/> keys.
 /// </summary>
-public abstract class DapperRoleStore
+public class DapperRoleStore
     : DapperRoleStore<IdentityRole>
 {
     /// <inheritdoc/>
@@ -16,10 +16,10 @@ public abstract class DapperRoleStore
 
 
     /// <inheritdoc/>
-    protected override string[] GetRoleInsertProperties() => IdentityRoleInsertProperties;
+    protected override Dictionary<string, string> GetRoleInsertProperties() => IdentityRoleInsertProperties;
 
     /// <inheritdoc/>
-    protected override string[] GetRoleUpdateProperties() => IdentityRoleUpdateProperties;
+    protected override Dictionary<string, string> GetRoleUpdateProperties() => IdentityRoleUpdateProperties;
 }
 
 /// <summary>

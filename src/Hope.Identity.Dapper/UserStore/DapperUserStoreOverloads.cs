@@ -16,10 +16,10 @@ public class DapperUserStore
 
 
     /// <inheritdoc/>
-    protected override string[] GetUserInsertProperties() => IdentityUserInsertProperties;
+    protected override Dictionary<string, string> GetUserInsertProperties() => IdentityUserInsertProperties;
 
     /// <inheritdoc/>
-    protected override string[] GetUserUpdateProperties() => IdentityUserUpdateProperties;
+    protected override Dictionary<string, string> GetUserUpdateProperties() => IdentityUserUpdateProperties;
 }
 
 /// <inheritdoc/>
