@@ -26,7 +26,7 @@ public static class SqlQueryExtensions
     /// <param name="namingPolicy">The naming policy to use for converting the property names to column names (<see langword="null"/> for no conversion).</param>
     /// <param name="insertLines">Whether to insert new lines between each column name.</param>
     /// <returns>The SQL columns block.</returns>
-    public static string BuildSqlColumnsBlock(this string[] propertyNames, JsonNamingPolicy? namingPolicy = null, bool insertLines = false)
+    public static string BuildSqlColumnsBlock(this IEnumerable<string> propertyNames, JsonNamingPolicy? namingPolicy = null, bool insertLines = false)
     {
         var queryProperties = propertyNames.Select(namingPolicy.TryConvertName);
         if (insertLines)
@@ -58,7 +58,7 @@ public static class SqlQueryExtensions
     /// <param name="prefix">The prefix to add to each parameter name.</param>
     /// <param name="suffix">The suffix to add to each parameter name.</param>
     /// <returns>The SQL parameters block.</returns>
-    public static string BuildSqlParametersBlock(this string[] propertyNames, bool insertLines = false, string prefix = "@", string suffix = "")
+    public static string BuildSqlParametersBlock(this IEnumerable<string> propertyNames, bool insertLines = false, string prefix = "@", string suffix = "")
     {
         var queryParameters = propertyNames.Select(name => $"{prefix}{name}{suffix}");
         if (insertLines)

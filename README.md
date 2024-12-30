@@ -42,11 +42,15 @@ builder.Services.AddIdentityCore<CustomUser>()
         options.TableNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
         options.UserNames.Table = "custom_users";
 
-        options.ExtraUserInsertProperties = [
-            nameof(CustomUser.CreatedOn), nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
-
-        options.ExtraUserUpdateProperties = [
-            nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
+        options.ExtraUserInsertProperties = new() {
+            { nameof(CustomUser.CreatedOn), "created_utc" }, 
+            { nameof(CustomUser.FirstName), null }, 
+            { nameof(CustomUser.LastName), null }
+        };
+        options.ExtraUserUpdateProperties = new() {
+            { nameof(CustomUser.FirstName), null }, 
+            { nameof(CustomUser.LastName), null }
+        };
     });
 
 var app = builder.Build();
@@ -73,11 +77,15 @@ builder.Services.AddIdentity<CustomUser, IdentityRole<Guid>>()
         options.TableNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
         options.UserNames.Table = "custom_users";
 
-        options.ExtraUserInsertProperties = [
-            nameof(CustomUser.CreatedOn), nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
-
-        options.ExtraUserUpdateProperties = [
-            nameof(CustomUser.FirstName), nameof(CustomUser.LastName)];
+        options.ExtraUserInsertProperties = new() {
+            { nameof(CustomUser.CreatedOn), "created_utc" }, 
+            { nameof(CustomUser.FirstName), null }, 
+            { nameof(CustomUser.LastName), null }
+        };
+        options.ExtraUserUpdateProperties = new() {
+            { nameof(CustomUser.FirstName), null }, 
+            { nameof(CustomUser.LastName), null }
+        };
     });
 
 var app = builder.Build();

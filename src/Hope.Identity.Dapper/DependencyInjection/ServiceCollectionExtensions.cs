@@ -99,9 +99,8 @@ public static class ServiceCollectionExtensions
             throw new ArgumentException("The role store type provided must inherit from DapperRoleStore or one of its generic overloads.", nameof(roleStoreType));
         }
 
-        userStoreType ??= roleType is null
-            ? typeof(DapperUserStore<,>).MakeGenericType(userType, keyType)
-            : typeof(DapperUserStore<,,>).MakeGenericType(userType, roleType, keyType);
+        roleType ??= typeof(IdentityRole);
+        userStoreType ??= typeof(DapperUserStore<,,>).MakeGenericType(userType, roleType, keyType);
 
         services.AddScoped(userStoreType);
         services.TryAddScoped(typeof(IUserStore<>).MakeGenericType(userType), sp => sp.GetRequiredService(userStoreType));
